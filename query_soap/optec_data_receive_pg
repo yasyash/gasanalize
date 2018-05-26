@@ -1,0 +1,111 @@
+#!/usr/bin/perl -w
+use POSIX qw(strftime);
+
+
+#sudo apt-get install  libsoap-lite-perl
+#sudo apt-get install libdbd-mysql-perl
+#sudo apt-get install libdbi-perl
+#sudo apt-get install  libxml-simple-perl
+
+
+use SOAP::Lite; #(+trace =>"all", readable => 1);
+#( +trace => , maptype => {} );;
+use DBI;
+use MIME::Base64;
+use XML::Simple;
+ 
+$db = DBI->connect("DBI:Pg:host=localhost;dbname=weather","weather","31415") or die "No access to database: $!";
+$i = $j = 0;
+$period = 5; # average period is 20 minutes
+#$insert
+$insert = "INSERT INTO sensors_data (  idd, serialnum, date_time, typemeasure, measure, is_alert)  VALUES(?,?,?,?,?,?)";
+$update = "UPDATE equipments SET date_time_out = ? WHERE serialnum = ?"; 
+
+$query_ins = $db->prepare("$insert");
+$query_update = $db->prepare("$update");
+
+$wsdl = 'http://84.204.102.4/SkatApiService/Service.asmx';
+
+
+$xmlns="http://skat.ru/";
+$method_get = "GetHistoricalDataBrief";
+
+$password = $user = 'shklyar';
+#$prefix =  undef;
+
+$client = SOAP::Lite->service($wsdl . '?wsdl'); 
+		$client->proxy( $wsdl);
+		#$client->ns($xmlns, $prefix);
+		$client->uri($xmlns);
+
+
+#$client->outputxml('true');
+$client->readable(1);
+$client->on_action( sub {  join '', '"'.$xmlns,qq($_[1]")} );
+
+
+
+ $Username = SOAP::Header->name('login' => $user);
+ $Password = SOAP::Header->name('password' => $password);
+         
+ $UsernameToken = SOAP::Header->value($Username, $Password);
+ $security = SOAP::Header->name('AuthHeaderInfo')->attr({'xmlns' => $xmlns})->value(\$UsernameToken);
+
+	$select = "SELECT * FROM equipments WHERE is_present = true";
+	#print ("Select is " .  localtime() . "\n");
+	$query = $db->prepare("$select");
+	$query->execute();
+	
+
+	if ($query->rows >0)
+	{	
+		#print "In query is ". $query->rows ." rows.\n";
+		while (@row = $query->fetchrow_array)
+			{
+			 #@row = $query->fetchrow_array();
+			 $_ = $row[4];
+			 m{^\s*(\d{1,4})\W*0*(\d{2})\W*0*(\d{2})\W*0*
+        	         (\d{2})\W*0*(\d{2})\W*0*(\d{2})}x;
+			 $j++;
+ 			 print "Query === $j === for sensor === $row[1] === \n Serial num. === $row[2]\n Time period is from $row[4] to ".
+				 strftime ("%Y-%m-%d %H:%M:%S", localtime)."\n";
+			 $avrg_period = SOAP::Data->name('AveragePeriod' => $period);
+			 $id = SOAP::Data->name('string' => $row[2]); #sensor ID
+			 $sensor = SOAP::Data->name('sSensors')->value(\$id);
+			 $from  = SOAP::Data->name('From' => "$1-$2-$3T$4:$5:$6");
+			 $to  = SOAP::Data->name('To' => strftime ("%Y-%m-%dT%H:%M:%S", localtime));
+			 
+
+			 $som = $client->call($method_get,$avrg_period, $sensor,$from, $to, $security );
+
+			 die $som->faultstring if ($som->fault);
+
+				for  $t ($som->valueof('//GetHistoricalDataBriefResponse/GetHistoricalDataBriefResult/SensorData/Data/BriefData')) {
+					$i++;
+      					#print $t->{Time} . " - " .  $t->{Value} ."\n";
+					$_ = $t->{Time};
+					s/T/ /;
+					print "Result === time is === " . $_ ." === and value === $t->{Value} \n";
+					$query_ins->execute( $row[0], $row[2], $_, $row[1], $t->{Value}, '0');
+					$last_update = $_;
+
+    				}
+				
+			$query_update->execute($last_update, $row[2]) if (defined($last_update));
+			print "================================================================\n";
+
+			}
+	}
+	
+
+
+$query->finish;
+$query_update->finish;
+$query_ins ->finish;
+
+
+print ("\nThere are ".$j." sensors in the database and " . $i . " records added from SOAP query\n");
+$db->disconnect;
+#print "Result is: ". XMLout($elm)."\n\n";
+#print "Result is: ". $som->dataof('//GetStationsResponse/GetStationsResult/StationInfo/*'). "...\n\n";
+
