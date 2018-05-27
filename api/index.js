@@ -11,6 +11,7 @@ import users from './users';
 import auth from './auth';
 import events from './events';
 import query from './query';
+import meteoquery from './meteoquery';
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use('/api/users', users);
 app.use('/api/auth', auth);
 app.use('/api/events', events);
 app.use('/api/query', query);
+app.use('/api/meteoquery', meteoquery);
 
 
 const compiler = webpack(webpackConfig);
