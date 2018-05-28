@@ -2,13 +2,13 @@
 
 import React from 'react';
 import UserEventForm from './userEventForm';
-import { queryEvent } from './actions/queryActions';
+import { queryMeteoEvent } from './actions/queryActions';
 import { connect } from 'react-redux';
 
-import TableForm from './TableForm';
+import ChartForm from './ChartForm';
 
 
-class TablePage extends React.Component {
+class ChartPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -26,10 +26,10 @@ class TablePage extends React.Component {
             deselectOnClickaway: false,
             showCheckboxes: true,
             height: '100px',
-            station_actual:'',
-            stationsList: [],
-            sensorsList: [],
-            dataList: []
+
+            stationsList: [] ,
+            sensorsList: [] ,
+            dataList:[]
 
 
         }
@@ -39,7 +39,7 @@ class TablePage extends React.Component {
         return (
             <div className="container">
 
-                <TableForm queryEvent={queryEvent} {...this.state} />
+                <ChartForm  {...this.state} />
 
             </div>
         );
@@ -47,7 +47,7 @@ class TablePage extends React.Component {
 }
 
 function mapStateToProps(state) {
-    return {
+    return { 
         fixedHeader: state.fixedHeader,
         fixedFooter: state.fixedFooter,
         stripedRows: state.stripedRows,
@@ -59,7 +59,7 @@ function mapStateToProps(state) {
         showCheckboxes: state.showCheckboxes,
         height: state.height
     };
-}
+  }
 
 
-export default connect(mapStateToProps, { queryEvent })(TablePage);
+export default connect(null, { queryMeteoEvent })(ChartPage);

@@ -21,6 +21,9 @@ import Renew from 'material-ui/svg-icons/action/autorenew';
 import Snackbar from '@material-ui/core/Snackbar';
 import Slider from '@material-ui/core/Slide';
 
+import { addActiveStationsList, deleteActiveStationsList, getFirstActiveStationsList } from './actions/stationsAddAction';
+import { addDataList, deleteDataList } from './actions/dataAddActions';
+import { deleteSensorsList } from './actions/sensorsAddAction';
 
 import ReactTable from "react-table";
 import checkboxHOC from "react-table/lib/hoc/selectTable";
@@ -90,7 +93,7 @@ class TableForm extends React.Component {
             deselectOnClickaway,
             showCheckboxes,
             height,
-
+            station_actual,
             stationsList,
             sensorsList,
             dataList,
@@ -102,13 +105,13 @@ class TableForm extends React.Component {
 
         this.state = {
             title: '',
-            snack_msg:'',
+            snack_msg: '',
             errors: {},
             isLoading: false,
 
             dateTimeBegin: new Date().format('Y-MM-dd') + ' 00:00:00',
             dateTimeEnd: new Date().format('Y-MM-dd H:m:SS'),
-            station_actual: '',
+            station_actual,
             sensors_actual: [],
             stationsList,
             sensorsList,
@@ -132,8 +135,8 @@ class TableForm extends React.Component {
 
 
         this.onClick = this.onSubmit.bind(this);
-      // this.onClose= this.handleClose.bind(this);
-       //this.onExited= this.handleClose.bind(this);
+        // this.onClose= this.handleClose.bind(this);
+        //this.onExited= this.handleClose.bind(this);
 
         //   this.onRowSelection = this.onRowSelection.bind(this);
     }
@@ -173,12 +176,18 @@ class TableForm extends React.Component {
                 ...selection.slice(0, keyIndex),
                 ...selection.slice(keyIndex + 1)
             ];
+            if (row.id == this.state.station_actual) {
+                this.setState({ station_actual: '' });
+            };
+
         } else {
             // it does not exist so add it
             selection.push(key);
+            this.setState({ station_actual: row.id });
+
         }
         // update the state
-        this.setState({ selection, station_actual: row.id });
+        this.setState({ selection });
     };
 
     toggleAll() {
@@ -271,10 +280,9 @@ class TableForm extends React.Component {
 
         this.loadData(1).then(data => {
             if (data) {
-                this.setState({ sensorsList: this.setData(data) })
+                // this.setState({ sensorsList: this.setData(data) })
                 this.setState({ isLoading: true })
                 this.setState({ snack_msg: 'Данные успешно загружены...' })
-
             }
             else {
                 this.setState({ isLoading: false })
@@ -296,11 +304,18 @@ class TableForm extends React.Component {
         params.period_to = this.state.dateTimeEnd;
         if (qtype === 1) {
             params.station = this.state.station_actual;
+            // if (this.props.station_actual.length > 0) { deleteActiveStationsList(); };
+            addActiveStationsList({ station: this.state.station_actual });
+            deleteDataList();
+            deleteSensorsList();
+            //this.setState({ slection: '' })
         }
         if (qtype === 2) {
             params.station = this.state.station_actual;
             params.sensors = this.state.sensors_actual;
-        }
+            // addActiveSensorsList(this.state.sensors_actual);
+
+        } // query for sensors data had been sent to the TableSensors component
         let data = await (this.props.queryEvent(params));
         //console.log(data);
         return data;
@@ -312,7 +327,25 @@ class TableForm extends React.Component {
         //const getStations = this.props.queryEvent(this.state);
         //this.setState({ stationsList: getStations });
         // this.loadData().then(data => this.setState({ stationsList: data }));
-        this.loadData(0).then(data => this.setState({ stationsList: this.setData(data) }));
+
+        //if (this.props.station_actual.length > 0) { deleteActiveStationsList(); };
+
+        this.loadData(0).then(data => {
+            if (this.props.station_actual) {
+                let selection =[];
+                if (this.props.station_actual.length > 0) {
+                    data.forEach(element => {
+                        if (element.id == this.props.station_actual) {
+                            selection.push(element._id );
+                        };
+                    });
+                    this.setState({ selection });
+                    this.setState({ station_actual: this.props.station_actual });
+                }
+            }
+            this.setState({ stationsList: data });
+
+        });
         // this.loadData().then(data => this.setState({ stationsList: data }));
 
 
@@ -407,7 +440,7 @@ class TableForm extends React.Component {
                             handleChange={this.handleChange.bind(this)}
                             onRefresh={this.onRefresh.bind(this)}
                             isStation={true} {...this.state}
-                            handleClose = {this.handleClose.bind(this)}
+                            handleClose={this.handleClose.bind(this)}
                         />
                         <br />
 
@@ -463,14 +496,16 @@ class TableForm extends React.Component {
                     <Renew />
 
                 </IconButton>
-                
-         
+
+
             </div >
         );
     }
 }
 
 function mapStateToProps(state) {
+    let station = '';
+    if (state.activeStationsList[0]) { station = state.activeStationsList[0].station }
     return {
 
         /*  fixedHeader: state.fixedHeader,
@@ -482,8 +517,8 @@ function mapStateToProps(state) {
           enableSelectAll: state.enableSelectAll,
           deselectOnClickaway: state.deselectOnClickaway,
           showCheckboxes: state.showCheckboxes,*/
-        sensorsList: state.sensorsList
-
+        //sensorsList: state.sensorsList
+        station_actual: station
 
     };
 }
@@ -491,11 +526,14 @@ function mapStateToProps(state) {
 
 TableForm.propTypes = {
     queryEvent: PropTypes.func.isRequired,
-    //loadData: PropTypes.func.isRequired
+    addActiveStationsList: PropTypes.func.isRequired,
+    getFirstActiveStationsList: PropTypes.func.isRequired,
+    deleteDataList: PropTypes.func.isRequired,
+    deleteSensorsList: PropTypes.func.isRequired
 }
 
 TableForm.contextType = {
     router: PropTypes.object.isRequired
 }
 
-export default connect(null, { queryEvent })(withRouter(TableForm));
+export default connect(mapStateToProps, { queryEvent, addActiveStationsList, getFirstActiveStationsList, deleteDataList, deleteSensorsList })(withRouter(TableForm));

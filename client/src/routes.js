@@ -9,6 +9,7 @@ import signUp from './signUp';
 import UserEventPage from './usereventPage'
 import TablePage from './TablePage';
 import MeteoPage from './MeteoPage';
+import ChartPage from './ChartPage';
 
 
 import Divider from 'material-ui/Divider';
@@ -23,6 +24,7 @@ export default (
                 <Route path="/myuserevent" component={requireAuth(UserEventPage)} />
                 <Route path="/tables" component={requireAuth(TablePage)} />
                 <Route path="/meteo" component={requireAuth(MeteoPage)} />
+                <Route path="/charts" component={requireAuth(ChartPage)} />
 
             </Switch>
         </div>

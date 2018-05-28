@@ -35,8 +35,8 @@ class NavigationBar extends React.Component {
     }
     const userLinks = (
       <ul className="nav navbar-nav navbar-right">
-        <li><Link to="/meteo">Метеоданные  &nbsp;</Link>
-
+        <li><Link to="/charts">Графики  &nbsp;</Link>
+          <Link to="/meteo">Метеоданные  &nbsp;</Link>
           <Link to="/tables">Таблицы  &nbsp;</Link>
           <a href="#" onClick={this.logout.bind(this)}>   Выход</a></li>
       </ul>

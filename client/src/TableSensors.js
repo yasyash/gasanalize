@@ -16,12 +16,14 @@ import SensorsIcon from 'material-ui/svg-icons/action/settings-input-component';
 import StationsIcon from 'material-ui/svg-icons/action/account-balance';
 import DataIcon from 'material-ui/svg-icons/action/timeline';
 
+import { addActiveSensorsList, deleteActiveSensorsList } from './actions/sensorsAddAction';
+import { addActiveStationsList, deleteActiveStationsList, getFirstActiveStationsList } from './actions/stationsAddAction';
 
 import ReactTable from "react-table";
 
-
-
 import checkboxHOC from "react-table/lib/hoc/selectTable";
+
+
 const CheckboxTable = checkboxHOC(ReactTable);
 Object.assign(CheckboxTable, {
     previousText: 'Предыдущие',
@@ -69,14 +71,15 @@ class TableSensors extends React.Component {
             dateTimeBegin,
             dateTimeEnd,
             sensors_actual,
-            snack_msg
+            snack_msg,
+            selection
 
         } = props;
 
 
         this.state = {
             title: '',
-            snack_msg:'',
+            snack_msg: '',
             errors: {},
             isLoading: false,
 
@@ -100,7 +103,7 @@ class TableSensors extends React.Component {
             showCheckboxes,
             height: '300px',
 
-            selection: [],
+            selection,
             selectAll: false
         };
 
@@ -254,6 +257,9 @@ class TableSensors extends React.Component {
                     this.setState({ dataList: data })
                     this.setState({ isLoading: true })
                     this.setState({ snack_msg: 'Данные успешно загружены...' })
+                    // addActiveSensorsList(this.state.selection);
+                    getFirstActiveStationsList();
+                    addActiveStationsList({ sensors: this.state.selection });
 
                 }
                 else {
@@ -275,14 +281,37 @@ class TableSensors extends React.Component {
     //  this.setState({ [e.target.name]: e.target.value });
     //}
     componentWillMount() {
-        //const getStations = this.props.queryEvent(this.state);
+        const getSensors = this.props.sensorsList;
+        let sensors_actual =[];
+        let selection = [];
+
+        this.setState({ selection: [] });
+
         //this.setState({ stationsList: getStations });
         // this.loadData().then(data => this.setState({ stationsList: data }));
         //  this.loadData().then(data => this.setState({ stationsList: data }));
         // this.loadData().then(data => this.setState({ stationsList: data }));
-
+        if (this.props.sensorsList.length > 0) {
+            getSensors.forEach(element => {
+                if (this.props.selection.indexOf(element._id)>-1) {
+                    sensors_actual.push(element.serialnum);
+                    selection.push(element._id);
+                };
+            });
+            this.setState({ sensors_actual, selection });
+        };
 
     };
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.station_actual) {
+            if (this.props.station_actual !== nextProps.station_actual)
+               { this.setState({ selection: '' });
+                this.setState({ sensors_actual: '' });}
+
+        };
+    };
+
 
     render() {
         const { toggleSelection, toggleAll, isSelected } = this;
@@ -406,6 +435,20 @@ class TableSensors extends React.Component {
 }
 
 function mapStateToProps(state) {
+    let sensors = '';
+    let station = '';
+    let tmp = '';
+    if (state.activeStationsList[1]) {
+        tmp = state.activeStationsList.slice(state.activeStationsList.length - 1, );
+        sensors = tmp[0].sensors;
+
+    };
+
+    if (state.activeStationsList[0]) {
+        tmp = state.activeStationsList.slice(0,1 );
+        station = tmp[0].station;
+
+    };
     return {
 
         /*  fixedHeader: state.fixedHeader,
@@ -417,8 +460,11 @@ function mapStateToProps(state) {
           enableSelectAll: state.enableSelectAll,
           deselectOnClickaway: state.deselectOnClickaway,
           showCheckboxes: state.showCheckboxes,*/
-        height: state.height
+        //height: state.height
 
+        sensorsList: state.activeSensorsList,
+        selection: sensors,
+        station_actual: station
 
     };
 }
@@ -426,6 +472,9 @@ function mapStateToProps(state) {
 
 TableSensors.propTypes = {
     queryEvent: PropTypes.func.isRequired,
+    addActiveSensorsList: PropTypes.func.isRequired,
+    addActiveStationsList: PropTypes.func.isRequired,
+    getFirstActiveStationsList: PropTypes.func.isRequired
     //loadData: PropTypes.func.isRequired
 }
 
@@ -433,4 +482,4 @@ TableSensors.contextType = {
     router: PropTypes.object.isRequired
 }
 
-export default connect(null, { queryEvent })(withRouter(TableSensors));
+export default connect(mapStateToProps, { queryEvent, addActiveSensorsList, addActiveStationsList, getFirstActiveStationsList })(withRouter(TableSensors));

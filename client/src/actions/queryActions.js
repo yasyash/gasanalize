@@ -1,8 +1,10 @@
 import Axios from "axios";
 import format from 'node.date-time';
 import { addDataList, deleteDataList } from './dataAddActions';
-import { addSensorsList, deleteSensorsList } from './sensorsAddAction';
+import { addSensorsList, deleteSensorsList, addActiveSensorsList, deleteActiveSensorsList } from './sensorsAddAction';
 import { addMeteoList, deleteMeteoList } from './meteoAddAction';
+import { addActiveStationsList, deleteActiveStationsList } from './stationsAddAction';
+
 
 import shortid from 'shortid';
 import isEmpty from 'lodash.isempty';
@@ -27,9 +29,12 @@ export function queryEvent(paramstr) {
             .then(resp => resp.data)
             .then(data => {
                 const dataTable = [];
-                deleteDataList(); // add with id for table element
-                deleteSensorsList();
+               // deleteDataList(); // add with id for table element
+              //  deleteSensorsList();
                 if (data.stations) {
+                    //deleteActiveStationsList();
+                   // deleteActiveSensorsList();
+
                     let stations = data.stations;
                     stations.forEach(element => {
                         dataTable.push({
@@ -40,10 +45,11 @@ export function queryEvent(paramstr) {
                             date_time_out: new Date(element.date_time_out).format('Y-MM-dd HH:mm:SS')
                         });
                     });
-                    return dataTable;
+                    return wrapData(dataTable);
                 };
 
                 if (data.sensors) {
+                    deleteActiveSensorsList();
                     let sensors = data.sensors;
                     sensors.forEach(element => {
                         dataTable.push({
@@ -62,8 +68,10 @@ export function queryEvent(paramstr) {
 
                         });
                     });
-
-                    return dataTable;
+                    //addActiveStationsList(paramstr.station);
+                    let wrappedDataTable = wrapData(dataTable);
+                    addActiveSensorsList(wrappedDataTable);
+                    return wrappedDataTable;
                 };
                 if (data.response) {
                     let data_list = data.response[0];

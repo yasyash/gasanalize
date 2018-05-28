@@ -12,8 +12,12 @@ import sensorsList from './sensorsList';
 
 import meteoList from './meteoList';
 
+import activeStationsList from './activeStationsList';
+
+import activeSensorsList from './activeSensorsList';
+
 export default createStore(
-    combineReducers({meteoList,
+    combineReducers({activeStationsList, activeSensorsList, meteoList,
         dataList, sensorsList, flashMessages, auth
     }),
     composeWithDevTools(applyMiddleware(thunk))
