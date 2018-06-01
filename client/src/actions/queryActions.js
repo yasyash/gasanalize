@@ -3,8 +3,8 @@ import format from 'node.date-time';
 import { addDataList, deleteDataList } from './dataAddActions';
 import { addSensorsList, deleteSensorsList, addActiveSensorsList, deleteActiveSensorsList } from './sensorsAddAction';
 import { addMeteoList, deleteMeteoList } from './meteoAddAction';
-import { addActiveStationsList, deleteActiveStationsList } from './stationsAddAction';
-
+import { addActiveStationsList, deleteActiveStationsList, getFirstActiveStationsList } from './stationsAddAction';
+import {addConsentrationList} from './consentrationAddAction';
 
 import shortid from 'shortid';
 import isEmpty from 'lodash.isempty';
@@ -29,11 +29,11 @@ export function queryEvent(paramstr) {
             .then(resp => resp.data)
             .then(data => {
                 const dataTable = [];
-               // deleteDataList(); // add with id for table element
-              //  deleteSensorsList();
+                // deleteDataList(); // add with id for table element
+                //  deleteSensorsList();
                 if (data.stations) {
                     //deleteActiveStationsList();
-                   // deleteActiveSensorsList();
+                    // deleteActiveSensorsList();
 
                     let stations = data.stations;
                     stations.forEach(element => {
@@ -50,6 +50,7 @@ export function queryEvent(paramstr) {
 
                 if (data.sensors) {
                     deleteActiveSensorsList();
+                    getFirstActiveStationsList();
                     let sensors = data.sensors;
                     sensors.forEach(element => {
                         dataTable.push({
@@ -137,6 +138,20 @@ export function queryEvent(paramstr) {
                         }
 
                     };
+
+                    // Max allowable consentration
+
+                    let consentration = data.response[2];
+
+                    addConsentrationList(wrapData(consentration));
+                    /*macs.forEach(element => {
+                        dataTable.push({
+                            chemical: element.chemical,
+                            max_m: element.max_m,
+                            max_n: element.max_n
+                        });
+                    });*/
+
                     addDataList(wrapData(dataTable)); // add with id for table element
                     addSensorsList(wrapData(sensors_list));
 

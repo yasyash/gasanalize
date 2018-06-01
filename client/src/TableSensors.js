@@ -282,7 +282,7 @@ class TableSensors extends React.Component {
     //}
     componentWillMount() {
         const getSensors = this.props.sensorsList;
-        let sensors_actual =[];
+        let sensors_actual = [];
         let selection = [];
 
         this.setState({ selection: [] });
@@ -293,7 +293,7 @@ class TableSensors extends React.Component {
         // this.loadData().then(data => this.setState({ stationsList: data }));
         if (this.props.sensorsList.length > 0) {
             getSensors.forEach(element => {
-                if (this.props.selection.indexOf(element._id)>-1) {
+                if (this.props.selection.indexOf(element._id) > -1) {
                     sensors_actual.push(element.serialnum);
                     selection.push(element._id);
                 };
@@ -305,11 +305,21 @@ class TableSensors extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.station_actual) {
-            if (this.props.station_actual !== nextProps.station_actual)
-               { this.setState({ selection: '' });
-                this.setState({ sensors_actual: '' });}
+            if (this.props.station_actual !== nextProps.station_actual) {
+                this.setState({ selection: '' });
+                this.setState({ sensors_actual: '' });
+            } else {
+                if ((!this.props.isUpdated) && (nextProps.isUpdated)) {
+
+                    this.setState({ selection: '' });
+                    this.setState({ sensors_actual: '' });
+
+                };
+            };
 
         };
+
+
     };
 
 
@@ -445,7 +455,7 @@ function mapStateToProps(state) {
     };
 
     if (state.activeStationsList[0]) {
-        tmp = state.activeStationsList.slice(0,1 );
+        tmp = state.activeStationsList.slice(0, 1);
         station = tmp[0].station;
 
     };

@@ -15,22 +15,12 @@ class ChartPage extends React.Component {
             title: '',
             errors: {},
             isLoading: false,
-
-            fixedHeader: true,
-            fixedFooter: true,
-            stripedRows: true,
-            showRowHover: false,
-            selectable: true,
-            multiSelectable: false,
-            enableSelectAll: false,
-            deselectOnClickaway: false,
-            showCheckboxes: true,
-            height: '100px',
-
             stationsList: [] ,
             sensorsList: [] ,
-            dataList:[]
-
+            dataList:[],
+            station_actual:'',
+            sensors_actual:[],  
+            chartDate:{}
 
         }
     }

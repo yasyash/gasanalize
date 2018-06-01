@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
 import IconButton from 'material-ui/IconButton';
@@ -12,6 +13,8 @@ import Renew from 'material-ui/svg-icons/action/autorenew';
 import Snackbar from '@material-ui/core/Snackbar';
 import Slider from '@material-ui/core/Slide';
 
+import { withStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
 
 import { connect } from 'react-redux';
 
@@ -19,7 +22,13 @@ import { connect } from 'react-redux';
  * Three controlled examples, the first allowing a single selection, the second multiple selections,
  * the third using internal state.
  */
-const styles = {
+const styles = theme => ({
+    root: {
+        flexGrow: 1,
+        width: '90%',
+        align: 'center',
+        backgroundColor: theme.palette.background.paper,
+    },
     smallIcon: {
         width: 30,
         height: 30,
@@ -60,7 +69,7 @@ const styles = {
         overflow: 'hidden',
         margin: '20px auto 0',
     },
-};
+});
 
 
 class MenuTable extends Component {
@@ -171,6 +180,9 @@ class MenuTable extends Component {
 
 
     render() {
+
+        const { classes } = this.props;
+
         /*let { fixedHeader,
             fixedFooter,
             stripedRows,
@@ -183,119 +195,121 @@ class MenuTable extends Component {
             height
         } = this.props;*/
         return (
-            <nav className="navbar form-control">
-                <div className="navbar-header">
-                    <IconButton
-                        iconStyle={styles.smallIcon}
-                        style={styles.small} tooltip={'Обновить'}
-                        onClick={this.props.onRefresh}
-                    >
-                        <Renew />
+            //<Paper className={classes.root}>
 
-                    </IconButton>
-                   
-                </div>
+                <nav className="navbar form-control">
+                    <div className="navbar-header">
+                        <IconButton
+                            iconStyle={styles.smallIcon}
+                            style={styles.small} tooltip={'Обновить'}
+                            onClick={this.props.onRefresh}
+                        >
+                            <Renew />
 
-                <div className="navbar-right">
+                        </IconButton>
 
-                    <IconMenu
-                        iconButtonElement={<IconButton iconStyle={styles.smallIcon}
-                            style={styles.small} tooltip={'Настройки вида таблицы'}>
-                            <Settings />
-                        </IconButton>}
-                        onChange={this.handleChangeSingle}
-                        value={this.state.valueSingle}
-                    >
-                        <div className="form-control " style={styles.menuContainer}>
-                            <div style={styles.propContainer} >
+                    </div>
 
-                                <h5>Настройка таблицы</h5>
+                    <div className="navbar-right">
 
-                                <TextField
-                                    floatingLabelText="Высота окна таблицы"
-                                    defaultValue={this.state.height}
-                                    onChange={this.handleChange}
-                                />
+                        <IconMenu
+                            iconButtonElement={<IconButton iconStyle={styles.smallIcon}
+                                style={styles.small} tooltip={'Настройки вида таблицы'}>
+                                <Settings />
+                            </IconButton>}
+                            onChange={this.handleChangeSingle}
+                            value={this.state.valueSingle}
+                        >
+                            <div className="form-control " style={styles.menuContainer}>
+                                <div style={styles.propContainer} >
 
-                                <h5 style={styles.propToggleHeader}>Настройка вида таблицы</h5>
-                                <Toggle
-                                    name="deselectOnClickaway"
-                                    label="Отмена выбора кликом"
-                                    onToggle={this.handleToggle}
-                                    defaultToggled={this.state.deselectOnClickaway}
-                                />
-                                <Toggle
-                                    name="stripedRows"
-                                    label="Подсветка через строку"
-                                    onToggle={this.handleToggle}
-                                    defaultToggled={this.state.stripedRows}
-                                />
-                                <Toggle
-                                    name="showRowHover"
-                                    label="Выделять при наведении"
-                                    onToggle={this.handleToggle}
-                                    defaultToggled={this.state.showRowHover}
-                                />
-                                <h5 style={styles.propToggleHeader}>Настройка выбора</h5>
+                                    <h5>Настройка таблицы</h5>
 
+                                    <TextField
+                                        floatingLabelText="Высота окна таблицы"
+                                        defaultValue={this.state.height}
+                                        onChange={this.handleChange}
+                                    />
 
-                                <Toggle
-                                    name="fixedHeader"
-                                    label="Фиксировать верхний заголовок таблицы"
-                                    onToggle={this.handleToggle}
-                                    defaultToggled={this.state.fixedHeader}
-                                />
-                                <Toggle
-                                    name="fixedFooter"
-                                    label="Фиксировать нижний заголовок таблицы"
-                                    onToggle={this.handleToggle}
-                                    defaultToggled={this.state.fixedFooter}
-                                />
-                                <Toggle
-                                    name="showCheckboxes"
-                                    label="Показать элементы выбора"
-                                    onToggle={this.handleToggle}
-                                    defaultToggled={this.state.showCheckboxes}
-                                />
-                                <Toggle
-                                    name="selectable"
-                                    label="Активировать выбор записей"
-                                    onToggle={this.handleToggle}
-                                    defaultToggled={this.state.selectable}
-                                />
+                                    <h5 style={styles.propToggleHeader}>Настройка вида таблицы</h5>
+                                    <Toggle
+                                        name="deselectOnClickaway"
+                                        label="Отмена выбора кликом"
+                                        onToggle={this.handleToggle}
+                                        defaultToggled={this.state.deselectOnClickaway}
+                                    />
+                                    <Toggle
+                                        name="stripedRows"
+                                        label="Подсветка через строку"
+                                        onToggle={this.handleToggle}
+                                        defaultToggled={this.state.stripedRows}
+                                    />
+                                    <Toggle
+                                        name="showRowHover"
+                                        label="Выделять при наведении"
+                                        onToggle={this.handleToggle}
+                                        defaultToggled={this.state.showRowHover}
+                                    />
+                                    <h5 style={styles.propToggleHeader}>Настройка выбора</h5>
 
 
-                                {(!this.state.isStation) && <Toggle
-                                    name="multiSelectable"
-                                    label="Мультивыбор записей"
-                                    onToggle={this.handleToggle}
-                                    defaultToggled={this.state.multiSelectable}
-                                />}
+                                    <Toggle
+                                        name="fixedHeader"
+                                        label="Фиксировать верхний заголовок таблицы"
+                                        onToggle={this.handleToggle}
+                                        defaultToggled={this.state.fixedHeader}
+                                    />
+                                    <Toggle
+                                        name="fixedFooter"
+                                        label="Фиксировать нижний заголовок таблицы"
+                                        onToggle={this.handleToggle}
+                                        defaultToggled={this.state.fixedFooter}
+                                    />
+                                    <Toggle
+                                        name="showCheckboxes"
+                                        label="Показать элементы выбора"
+                                        onToggle={this.handleToggle}
+                                        defaultToggled={this.state.showCheckboxes}
+                                    />
+                                    <Toggle
+                                        name="selectable"
+                                        label="Активировать выбор записей"
+                                        onToggle={this.handleToggle}
+                                        defaultToggled={this.state.selectable}
+                                    />
 
-                                {(!this.state.isStation) && <Toggle
-                                    name="enableSelectAll"
-                                    label="Выбор всех записей"
-                                    onToggle={this.handleToggle}
-                                    defaultToggled={this.state.enableSelectAll}
-                                />}
+
+                                    {(!this.state.isStation) && <Toggle
+                                        name="multiSelectable"
+                                        label="Мультивыбор записей"
+                                        onToggle={this.handleToggle}
+                                        defaultToggled={this.state.multiSelectable}
+                                    />}
+
+                                    {(!this.state.isStation) && <Toggle
+                                        name="enableSelectAll"
+                                        label="Выбор всех записей"
+                                        onToggle={this.handleToggle}
+                                        defaultToggled={this.state.enableSelectAll}
+                                    />}
+                                </div>
                             </div>
-                        </div>
 
-                
-                    </IconMenu>
-                    
-                </div>
-                <Snackbar
-                    open={this.props.isLoading}
-                    // TransitionComponent={<Slider direction="up" />}
-                    autoHideDuration={4000}
-                    onClose={this.props.handleClose}
 
-                    message={<span id="message-id">{this.props.snack_msg}</span>}
+                        </IconMenu>
 
-                />
-            </nav>
+                    </div>
+                    <Snackbar
+                        open={this.props.isLoading}
+                        // TransitionComponent={<Slider direction="up" />}
+                        autoHideDuration={4000}
+                        onClose={this.props.handleClose}
 
+                        message={<span id="message-id">{this.props.snack_msg}</span>}
+
+                    />
+                </nav>
+            //</Paper>
         );
     }
 }
@@ -317,5 +331,9 @@ function mapStateToProps(state) {
     };
 }
 
+MenuTable.propTypes = {
 
-export default (MenuTable);
+    classes: PropTypes.object.isRequired
+  }
+
+export default withStyles(styles)(MenuTable);

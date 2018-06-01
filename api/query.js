@@ -11,8 +11,9 @@ import commonValidations from './shared/validations';
 import Stations from '../models/stations';
 import Sensors from '../models/sensors';
 import Data from '../models/data';
-
+import Macs from '../models/macs';
 import User from '../models/user';
+
 import url from 'url';
 import qs from 'querystring';
 
@@ -57,22 +58,23 @@ router.get('/', authenticate, (req, resp) => {
                 Sensors.query({
                     select: ['serialnum', 'typemeasure', 'unit_name'],
                     where: ({ is_present: true }),
-                    andWhere: ({ idd: data.station })
+                    andWhere: ({ idd: data.station }),
                 })
                     .query('whereIn', 'serialnum', data.sensors)
                     .fetchAll()
                     .catch(err => resp.status(500).json({ error: err })),
-
-                ((data_list, data_sensors) => {
-                    let response = [data_list, data_sensors];
+                Macs.fetchAll()
+                    .catch(err => resp.status(500).json({ error: err })),
+                ((data_list, data_sensors, consentration) => {
+                    let response = [data_list, data_sensors, consentration];
                     resp.json({ response });
                 })
 
             )
 
                 .catch(err => resp.status(500).json({ error: err }));
-        }
-    }
+        };
+    };
     //'whereIn', 'serialnum', data.sensors,
 
 

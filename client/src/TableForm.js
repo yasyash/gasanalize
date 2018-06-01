@@ -20,6 +20,8 @@ import IconButton from 'material-ui/IconButton';
 import Renew from 'material-ui/svg-icons/action/autorenew';
 import Snackbar from '@material-ui/core/Snackbar';
 import Slider from '@material-ui/core/Slide';
+import Paper from '@material-ui/core/Paper';
+import { withStyles } from '@material-ui/core/styles';
 
 import { addActiveStationsList, deleteActiveStationsList, getFirstActiveStationsList } from './actions/stationsAddAction';
 import { addDataList, deleteDataList } from './actions/dataAddActions';
@@ -54,26 +56,15 @@ import {
 import TextField from 'material-ui/TextField';
 import Toggle from 'material-ui/Toggle';
 
-const styles = {
-    propContainer: {
-        width: '80%',
-        overflow: 'hidden',
-        margin: '20px auto 0',
-    },
-    propToggleHeader: {
-        margin: '20px auto 10px',
-    },
-    tableRow: {
-        height: '20px'
-    },
-    tableRowColumn: {
-        height: '20px '
-    },
-    tr: {
-        height: '20px '
-    }
-};
 
+
+const styles = theme => ({
+    root: {
+        flexGrow: 1,
+        width: '100%',
+        backgroundColor: theme.palette.background.paper,
+    },
+});
 
 
 
@@ -130,7 +121,9 @@ class TableForm extends React.Component {
             height,
 
             selection: [],
-            selectAll: false
+            selectAll: false,
+
+            isUpdated: false
         };
 
 
@@ -261,6 +254,8 @@ class TableForm extends React.Component {
     //  };
     handleClose() {
         this.setState({ isLoading: false });
+        this.setState({ isUpdated: false });
+
     };
 
 
@@ -280,9 +275,12 @@ class TableForm extends React.Component {
 
         this.loadData(1).then(data => {
             if (data) {
+                this.loadData(3);
                 // this.setState({ sensorsList: this.setData(data) })
-                this.setState({ isLoading: true })
-                this.setState({ snack_msg: 'Данные успешно загружены...' })
+                this.setState({ isLoading: true });
+                this.setState({ snack_msg: 'Данные успешно загружены...' });
+                this.setState({ isUpdated: true });
+
             }
             else {
                 this.setState({ isLoading: false })
@@ -299,7 +297,7 @@ class TableForm extends React.Component {
     async    loadData(qtype) {
         let params = {};
         // 0 - all stations, 1- all sensors of the station, 2 - selected sensors
-
+        //3 - macs table
         params.period_from = this.state.dateTimeBegin;
         params.period_to = this.state.dateTimeEnd;
         if (qtype === 1) {
@@ -309,13 +307,18 @@ class TableForm extends React.Component {
             deleteDataList();
             deleteSensorsList();
             //this.setState({ slection: '' })
-        }
+        };
         if (qtype === 2) {
             params.station = this.state.station_actual;
             params.sensors = this.state.sensors_actual;
             // addActiveSensorsList(this.state.sensors_actual);
 
-        } // query for sensors data had been sent to the TableSensors component
+        }; // query for sensors data had been sent to the TableSensors component
+
+        if (qtype ===3){
+            params.sensors = this.state.sensors_actual;
+
+        };
         let data = await (this.props.queryEvent(params));
         //console.log(data);
         return data;
@@ -332,11 +335,11 @@ class TableForm extends React.Component {
 
         this.loadData(0).then(data => {
             if (this.props.station_actual) {
-                let selection =[];
+                let selection = [];
                 if (this.props.station_actual.length > 0) {
                     data.forEach(element => {
                         if (element.id == this.props.station_actual) {
-                            selection.push(element._id );
+                            selection.push(element._id);
                         };
                     });
                     this.setState({ selection });
@@ -354,6 +357,7 @@ class TableForm extends React.Component {
         const { toggleSelection, toggleAll, isSelected } = this;
         const { selection, selectAll, stationsList } = this.state;
         const { loadData } = this.props;
+        const { classes } = this.props;
         // var tableData = this.state.stationsList;
         // const { title, errors, isLoading } = this.state;
         //const {handleChange, handleToggle} = this.props;
@@ -427,10 +431,11 @@ class TableForm extends React.Component {
             }
         ]
 
+
         return (
 
 
-            <div>
+            <Paper className={classes.root}>
                 <Tabs>
                     <Tab
                         icon={<StationsIcon />}
@@ -498,7 +503,7 @@ class TableForm extends React.Component {
                 </IconButton>
 
 
-            </div >
+            </Paper >
         );
     }
 }
@@ -529,11 +534,12 @@ TableForm.propTypes = {
     addActiveStationsList: PropTypes.func.isRequired,
     getFirstActiveStationsList: PropTypes.func.isRequired,
     deleteDataList: PropTypes.func.isRequired,
-    deleteSensorsList: PropTypes.func.isRequired
+    deleteSensorsList: PropTypes.func.isRequired,
+    classes: PropTypes.object.isRequired
 }
 
 TableForm.contextType = {
     router: PropTypes.object.isRequired
 }
 
-export default connect(mapStateToProps, { queryEvent, addActiveStationsList, getFirstActiveStationsList, deleteDataList, deleteSensorsList })(withRouter(TableForm));
+export default connect(mapStateToProps, { queryEvent, addActiveStationsList, getFirstActiveStationsList, deleteDataList, deleteSensorsList })(withRouter(withStyles(styles)(TableForm)));

@@ -17,34 +17,32 @@ import IconButton from 'material-ui/IconButton';
 import Renew from 'material-ui/svg-icons/action/autorenew';
 import Snackbar from '@material-ui/core/Snackbar';
 import Slider from '@material-ui/core/Slide';
+import Switch from '@material-ui/core/Switch';
+import SvgIcon from '@material-ui/core/SvgIcon';
 
-import checkboxHOC from "react-table/lib/hoc/selectTable";
+import { withStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
+
+import { Bar, Line, Pie } from 'react-chartjs-2';
 
 import shortid from 'shortid';
+import isEmpty from 'lodash.isempty';
 import "react-table/react-table.css";
-//import './Table.css';
-//import './css/rwd-table.css';
+import isNumber from 'lodash.isnumber';
 
-const styles = {
-    propContainer: {
-        width: '80%',
-        overflow: 'hidden',
-        margin: '20px auto 0',
-    },
-    propToggleHeader: {
-        margin: '20px auto 10px',
-    },
-    tableRow: {
-        height: '20px'
-    },
-    tableRowColumn: {
-        height: '20px '
-    },
-    tr: {
-        height: '20px '
-    }
-};
+import MenuChart from './menuChart';
 
+
+
+const styles = theme => ({
+    root: {
+        flexGrow: 1,
+        width: '100%',
+        backgroundColor: theme.palette.background.paper,
+    },
+
+
+});
 
 
 
@@ -53,20 +51,11 @@ class ChartForm extends React.Component {
         super(props);
         const {
 
-
-            fixedHeader,
-            fixedFooter,
-            stripedRows,
-            showRowHover,
-            selectable,
-            multiSelectable,
-            enableSelectAll,
-            deselectOnClickaway,
-            showCheckboxes,
-            height,
-
+            chartData,
             stationsList,
             sensorsList,
+            sensors_actual,
+            station_actual,
             dataList,
 
 
@@ -76,7 +65,7 @@ class ChartForm extends React.Component {
 
         this.state = {
             title: '',
-            snack_msg:'',
+            snack_msg: '',
             errors: {},
             isLoading: false,
 
@@ -88,33 +77,32 @@ class ChartForm extends React.Component {
             sensorsList,
             dataList,
             selected: [],
-
-            fixedHeader,
-            fixedFooter,
-            stripedRows,
-            showRowHover,
-            selectable,
-            multiSelectable,
-            enableSelectAll,
-            deselectOnClickaway,
-            showCheckboxes,
-            height,
-
             selection: [],
-            selectAll: false
+            selectAll: false,
+            chartData,
+            locations: '',
+            checkedLine: true
         };
 
 
         this.onClick = this.onSubmit.bind(this);
-      // this.onClose= this.handleClose.bind(this);
-       //this.onExited= this.handleClose.bind(this);
+        // this.onClose= this.handleClose.bind(this);
+        //this.onExited= this.handleClose.bind(this);
 
         //   this.onRowSelection = this.onRowSelection.bind(this);
     }
- 
 
-    ////////////
+    static defaultProps = {
+        displayTitle: true,
+        displayLegend: true,
+        legendPosition: 'right',
+        locations: ''
+    };
 
+    ////////////    
+    handleChangeToggle = name => event => {
+        this.setState({ [name]: event.target.checked });
+    };
     onSubmit(e) {
         e.preventDefault();
 
@@ -155,28 +143,164 @@ class ChartForm extends React.Component {
         if (qtype === 1) {
             params.station = this.state.station_actual;
         }
-      
+
         let data = await (this.props.queryMeteoEvent(params));
         //console.log(data);
         return data;
     };
 
-    componentWillMount() {
-        //const getStations = this.props.queryMeteoEvent(this.state);
-        //this.setState({ stationsList: getStations });
-        // this.loadData().then(data => this.setState({ stationsList: data }));
-       // this.loadData(0).then(data => this.setState({ stationsList: this.setData(data) }));
-        // this.loadData().then(data => this.setState({ stationsList: data }));
 
 
+    getChartData() {
+        // Ajax calls here
+        const { dataList } = this.props;
+        const { sensors_actual } = this.props;
+        const { sensorsList } = this.props;
+        let obj = [];
+        let _boderColor = 'rgba(255, 99, 132, 0.6)';
+
+
+        let chartData = {
+            labels: ['0', '1', '2', '3', '4', '5'],
+
+            datasets: [
+                {
+                    label: 'Загрузите данные',
+                    fill: false,
+                    borderColor: _boderColor,
+                    backgroundColor: _boderColor,
+
+                    data: [
+                        0,
+                        1,
+                        0,
+                        1,
+                        0,
+                        3
+                    ],
+
+                }
+            ]
+        };
+
+        let title = 'данные не заданы';
+        let _timeaxis = [];
+
+        if (dataList.length > 1) {
+            let tmp = [];
+            let _tmp = '';
+            let filter = '';
+            let i = 0;
+            let label = '';
+            let counter = 0;
+            if (sensorsList.length > 0) {
+
+                chartData.datasets[0].data = [];
+                if (sensors_actual.length > 1) {
+                    sensors_actual.forEach(element => {
+
+                        dataList.forEach(item => {
+                            if (isEmpty(filter)) {
+                                filter = sensorsList.filter((_item, i, arr) => {
+                                    return _item._id === element;
+                                });
+                            };
+                            if (filter[0].serialnum) _tmp = item[filter[0].serialnum];
+                            if (isNumber(_tmp)) {
+                                tmp.push(_tmp);
+                                if (counter === 0) {
+                                    _timeaxis.push(item['date_time']);
+                                };
+                            } else {
+                                if (i === 0) label = _tmp;
+                            };
+
+                            i++;
+                        });
+
+                        //chartData.datasets[counter].data = Object.freeze(tmp);
+                        // if (!isEmpty(filter[0].def_colour)) {
+                        let n = '#' + (filter[0].def_colour.toString(16));
+                        let m = '#' + ((filter[0].def_colour + 20).toString(16));
+                        // chartData.datasets[counter].borderColor = n;
+                        //chartData.datasets[counter].backgroundColor = m;
+                        //};
+                        // if (!isEmpty(label))
+
+                        //chartData.datasets[counter].label = label;
+                        // let obj = chartData.datasets.concat(emptydatasets);
+                        let emptydatasets =
+                            {
+                                label: label,
+                                fill: false,
+                                borderColor: n,
+                                backgroundColor: m,
+                                data: tmp
+                            };
+                        //chartData.datasets = obj;
+                        if (!isEmpty(title)) title += ',';
+                        title = title + ' ' + label;
+                        //this.setState({ 'locations': title });
+                        label = '';
+                        tmp = [];
+
+                        filter = '';
+                        i = 0;
+                        // chartData.datasets[0].data = 
+                        obj.push(emptydatasets);
+
+                        counter++;
+                    });
+                    //chartData.datasets.splice(chartData.datasets.length - 1, );
+                    //   chartData.labels = _timeaxis;
+                    chartData.datasets = obj;
+                };
+            }; //end multidata section
+            if (sensors_actual.length === 1) {
+                dataList.forEach(element => {
+                    tmp.push(element.measure);
+                    _timeaxis.push(element['date_time']);
+
+                });
+                filter = sensorsList.filter((_item, i, arr) => {
+                    return _item._id === sensors_actual[0];
+                });
+                let n = '#' + (filter[0].def_colour.toString(16));
+                let m = '#' + ((filter[0].def_colour + 20).toString(16));
+
+                chartData.datasets[0].borderColor = n;
+                chartData.datasets[0].backgroundColor = m;
+                chartData.datasets[0].data = tmp;
+                chartData.datasets[0].label = dataList[0].typemeasure;
+                title = dataList[0].typemeasure + ' (' + dataList[0].unit_name + ')';
+
+            };
+
+            chartData.labels = _timeaxis;
+
+        }; // end fetch section when data is exist
+        //console.log('data = ', chartData.datasets[0].data);
+
+        this.setState({ 'locations': title });
+
+        this.setState({ chartData });
     };
+
+    componentWillMount() {
+        this.getChartData();
+    }
+
     render() {
         const { toggleSelection, toggleAll, isSelected } = this;
         const { selection, selectAll, stationsList } = this.state;
         const { loadData } = this.props;
-        
-       
-
+        const { classes } = this.props;
+        const { sensorsList } = this.props;
+        let titles = {
+            display: this.props.displayTitle,
+            text: 'Данные отсутствуют - сформируйте запрос',
+            fontSize: 15
+        };
         const Title = [
             {
                 Header: "Перечень метеостанций",
@@ -206,59 +330,74 @@ class ChartForm extends React.Component {
                     accessor: "date_time_in"
                 }]
             }
-        ]
+        ];
+        if (sensorsList.length > 0) {
+
+
+            titles = {
+                display: this.props.displayTitle,
+                text: 'График: ' + this.state.locations,
+                fontSize: 15
+            };
+        };
 
         return (
 
 
-            <div>
-                <Tabs>
-                    <Tab
-                        icon={<StationsIcon />}
-                        label="Метеостанции">
-                        <br />
-                        
-                    </Tab>
-                    <Tab
-                        icon={<SensorsIcon />}
-                        label="Данные наблюдений"
-                    >
-
-                     
-
-                    </Tab>
-                    
-
-                </Tabs>
-                <IconButton
-                    iconStyle={styles.smallIcon}
-                    style={styles.small} tooltip={'Обновить'}
-                    onClick={this.onSubmit}
-                >
-                    <Renew />
-
-                </IconButton>
-                
-         
-            </div >
+            <Paper className={classes.root}>
+                <MenuChart
+                    {...this.state}
+                    handleChangeToggle={this.handleChangeToggle('checkedLine').bind(this)}
+                    value="checkedLine"
+                />
+                {(this.state.checkedLine) &&
+                    <Line
+                        data={this.state.chartData}
+                        options={{
+                            title: titles,
+                            legend: {
+                                display: this.props.displayLegend,
+                                position: this.props.legendPosition
+                            }
+                        }}
+                    />}
+                {(!this.state.checkedLine) &&
+                    <Bar
+                        data={this.state.chartData}
+                        options={{
+                            title: titles,
+                            legend: {
+                                display: this.props.displayLegend,
+                                position: this.props.legendPosition
+                            }
+                        }}
+                    />}
+            </Paper >
         );
     }
 }
 
 function mapStateToProps(state) {
+    let sensors = '';
+    let station = '';
+    let tmp = '';
+    if (state.activeStationsList[1]) {
+        tmp = state.activeStationsList.slice(state.activeStationsList.length - 1, );
+        sensors = tmp[0].sensors;
+
+    };
+
+    if (state.activeStationsList[0]) {
+        station = state.activeStationsList[0].station;
+
+    };
+
+
     return {
-
-        /*  fixedHeader: state.fixedHeader,
-          fixedFooter: state.fixedFooter,
-          stripedRows: state.stripedRows,
-          showRowHover: state.showRowHover,
-          selectable: state.selectable,
-          multiSelectable: state.multiSelectable,
-          enableSelectAll: state.enableSelectAll,
-          deselectOnClickaway: state.deselectOnClickaway,
-          showCheckboxes: state.showCheckboxes,*/
-        sensorsList: state.sensorsList
-
+        sensorsList: state.activeSensorsList,
+        dataList: state.dataList,
+        station_actual: station,
+        sensors_actual: sensors
 
     };
 }
@@ -266,6 +405,7 @@ function mapStateToProps(state) {
 
 ChartForm.propTypes = {
     queryMeteoEvent: PropTypes.func.isRequired,
+    classes: PropTypes.object.isRequired
     //loadData: PropTypes.func.isRequired
 }
 
@@ -273,4 +413,4 @@ ChartForm.contextType = {
     router: PropTypes.object.isRequired
 }
 
-export default connect(null, { queryMeteoEvent })(withRouter(ChartForm));
+export default connect(mapStateToProps, { queryMeteoEvent })(withRouter(withStyles(styles)(ChartForm)));
