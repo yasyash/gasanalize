@@ -4,7 +4,7 @@ import { addDataList, deleteDataList } from './dataAddActions';
 import { addSensorsList, deleteSensorsList, addActiveSensorsList, deleteActiveSensorsList } from './sensorsAddAction';
 import { addMeteoList, deleteMeteoList } from './meteoAddAction';
 import { addActiveStationsList, deleteActiveStationsList, getFirstActiveStationsList } from './stationsAddAction';
-import {addConsentrationList} from './consentrationAddAction';
+import { addConsentrationList } from './consentrationAddAction';
 
 import shortid from 'shortid';
 import isEmpty from 'lodash.isempty';
@@ -173,7 +173,6 @@ export function queryMeteoEvent(paramstr) {
             .then(resp => resp.data)
             .then(data => {
                 const dataTable = [];
-                deleteMeteoList(); // add with id for table element
                 if (data.stations) {
                     let stations = data.stations;
                     stations.forEach(element => {
@@ -185,10 +184,12 @@ export function queryMeteoEvent(paramstr) {
                             date_time_out: new Date(element.date_time_out).format('Y-MM-dd HH:mm:SS')
                         });
                     });
-                    return dataTable;
+                    return wrapData(dataTable);
                 };
 
                 if (data.sensors) {
+                    deleteMeteoList(); // add with id for table element
+
                     let sensors = data.sensors;
                     sensors.forEach(element => {
                         dataTable.push({
@@ -233,6 +234,7 @@ export function queryMeteoEvent(paramstr) {
 
                         });
                     });
+                   // setMeteoStation('123-321');
                     addMeteoList(wrapData(dataTable)); // add with id for table element
 
                     return dataTable;

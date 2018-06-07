@@ -2,7 +2,7 @@ import path from 'path';
 import webpack from 'webpack';
 
 export default {
-    entry: ['webpack-hot-middleware/client',
+    entry: ['babel-polyfill', 'webpack-hot-middleware/client',
         path.join(__dirname, '/client/src/index.js')],
     output: {
         path: '/',

@@ -88,6 +88,8 @@ class TableForm extends React.Component {
             stationsList,
             sensorsList,
             dataList,
+            dateTimeBegin,
+            dateTimeEnd
 
 
         } = props;
@@ -100,8 +102,8 @@ class TableForm extends React.Component {
             errors: {},
             isLoading: false,
 
-            dateTimeBegin: new Date().format('Y-MM-dd') + ' 00:00:00',
-            dateTimeEnd: new Date().format('Y-MM-dd H:m:SS'),
+            dateTimeBegin, //new Date().format('Y-MM-dd') + 'T00:00',
+            dateTimeEnd, //new Date().format('Y-MM-ddTH:mm'),
             station_actual,
             sensors_actual: [],
             stationsList,
@@ -118,7 +120,7 @@ class TableForm extends React.Component {
             enableSelectAll,
             deselectOnClickaway,
             showCheckboxes,
-            height,
+            height: '300px',
 
             selection: [],
             selectAll: false,
@@ -127,10 +129,10 @@ class TableForm extends React.Component {
         };
 
 
-        this.onClick = this.onSubmit.bind(this);
+        // this.onClick = this.onSubmit.bind(this);
         // this.onClose= this.handleClose.bind(this);
         //this.onExited= this.handleClose.bind(this);
-
+        // this.onClick = this.onRefresh.bind(this);
         //   this.onRowSelection = this.onRowSelection.bind(this);
     }
     // this.onChange = this.onChange.bind(this);
@@ -269,9 +271,9 @@ class TableForm extends React.Component {
         //   this.props.createMyEvent(this.state);
     };
 
-    onRefresh() {
+    handleClick() {
 
-        // e.preventDefault();
+        //e.preventDefault();
 
         this.loadData(1).then(data => {
             if (data) {
@@ -315,7 +317,7 @@ class TableForm extends React.Component {
 
         }; // query for sensors data had been sent to the TableSensors component
 
-        if (qtype ===3){
+        if (qtype === 3) {
             params.sensors = this.state.sensors_actual;
 
         };
@@ -355,7 +357,7 @@ class TableForm extends React.Component {
     };
     render() {
         const { toggleSelection, toggleAll, isSelected } = this;
-        const { selection, selectAll, stationsList } = this.state;
+        const { selection, selectAll, stationsList, height } = this.state;
         const { loadData } = this.props;
         const { classes } = this.props;
         // var tableData = this.state.stationsList;
@@ -443,7 +445,7 @@ class TableForm extends React.Component {
                         <br />
                         <MenuTable handleToggle={this.handleToggle.bind(this)}
                             handleChange={this.handleChange.bind(this)}
-                            onRefresh={this.onRefresh.bind(this)}
+                            handleClick={this.handleClick.bind(this)}
                             isStation={true} {...this.state}
                             handleClose={this.handleClose.bind(this)}
                         />
@@ -456,7 +458,6 @@ class TableForm extends React.Component {
                                 columns={Title}
                                 {...checkboxProps}
                                 defaultPageSize={3}
-                                className="-striped -highlight"
                                 previousText={'Предыдущие'}
                                 nextText={'Следующие'}
                                 loadingText={'Loading...'}
@@ -464,6 +465,10 @@ class TableForm extends React.Component {
                                 pageText={'Страница'}
                                 ofText={'из'}
                                 rowsText={'записей'}
+                                style={{
+                                    height: height+100 // This will force the table body to overflow and scroll, since there is not enough room
+                                }}
+                                className="-striped -highlight"
                                 {...this.state}
                             />
                             <br />
@@ -523,7 +528,9 @@ function mapStateToProps(state) {
           deselectOnClickaway: state.deselectOnClickaway,
           showCheckboxes: state.showCheckboxes,*/
         //sensorsList: state.sensorsList
-        station_actual: station
+        station_actual: station,
+        dateTimeBegin: state.datePickers.dateTimeBegin,
+        dateTimeEnd: state.datePickers.dateTimeEnd
 
     };
 }
@@ -542,4 +549,7 @@ TableForm.contextType = {
     router: PropTypes.object.isRequired
 }
 
-export default connect(mapStateToProps, { queryEvent, addActiveStationsList, getFirstActiveStationsList, deleteDataList, deleteSensorsList })(withRouter(withStyles(styles)(TableForm)));
+export default connect(mapStateToProps, {
+    queryEvent, addActiveStationsList,
+    getFirstActiveStationsList, deleteDataList, deleteSensorsList
+})(withRouter(withStyles(styles)(TableForm)));

@@ -31,8 +31,7 @@ router.get('/', authenticate, (req, resp) => {
     //    obj = JSON.parse(decodeURIComponent(query))
     //}
     const between_date = [data.period_from, data.period_to];
-    // const between_date = ['2018-05-21 00:00:00', '2018-05-21 19:05:00']
-    // console.log('sensors ', data.sensors[0]);
+//     console.log('data ', between_date);
 
     if (isEmpty(data.station)) {
         Stations.query({
@@ -56,7 +55,7 @@ router.get('/', authenticate, (req, resp) => {
                     .orderBy('date_time', 'ASC').fetchAll()
                     .catch(err => resp.status(500).json({ error: err })),
                 Sensors.query({
-                    select: ['serialnum', 'typemeasure', 'unit_name'],
+                    select: ['serialnum', 'typemeasure', 'unit_name','def_colour'],
                     where: ({ is_present: true }),
                     andWhere: ({ idd: data.station }),
                 })

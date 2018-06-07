@@ -26,6 +26,8 @@ class MeteoPage extends React.Component {
             deselectOnClickaway: false,
             showCheckboxes: true,
             height: '100px',
+            dateTimeBegin: new Date().format('Y-MM-dd') + 'T00:00:00',
+            dateTimeEnd: new Date().format('Y-MM-ddTHH:mm'),
 
             stationsList: [] ,
             sensorsList: [] ,

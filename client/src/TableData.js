@@ -18,10 +18,21 @@ import DataIcon from 'material-ui/svg-icons/action/timeline';
 
 import ReactTable from "react-table";
 
-
-
 import checkboxHOC from "react-table/lib/hoc/selectTable";
+import FoldableTableHOC from '../foldableTable/index';
+import shortid from 'shortid';
+
+
+
+import TextField from 'material-ui/TextField';
+import Toggle from 'material-ui/Toggle';
+
+import { withStyles } from '@material-ui/core/styles';
+
+
+
 const CheckboxTable = checkboxHOC(ReactTable);
+
 Object.assign(CheckboxTable, {
     previousText: 'Предыдущие',
     nextText: 'Следующие',
@@ -31,19 +42,23 @@ Object.assign(CheckboxTable, {
     ofText: 'из',
     rowsText: 'записей',
 });
-import shortid from 'shortid';
+const FoldableTable = FoldableTableHOC(CheckboxTable);
 
-import {
-    Table,
-    TableBody,
-    TableFooter,
-    TableHeader,
-    TableHeaderColumn,
-    TableRow,
-    TableRowColumn,
-} from 'material-ui/Table';
-import TextField from 'material-ui/TextField';
-import Toggle from 'material-ui/Toggle';
+const styles = theme => ({
+    container: {
+        display: 'flex',
+        flexWrap: 'wrap',
+    },
+    textField: {
+        marginLeft: theme.spacing.unit,
+        marginRight: theme.spacing.unit,
+        width: 200,
+    },
+    menu: {
+        width: 200,
+    },
+});
+
 
 class TableData extends React.Component {
     constructor(props) {
@@ -75,7 +90,7 @@ class TableData extends React.Component {
 
         this.state = {
             title: '',
-            snack_msg:'',
+            snack_msg: '',
             errors: {},
             isLoading: false,
 
@@ -93,18 +108,18 @@ class TableData extends React.Component {
             stripedRows,
             showRowHover,
             selectable,
-            multiSelectable,
-            enableSelectAll,
+            multiSelectable: true,
+            enableSelectAll: true,
             deselectOnClickaway,
             showCheckboxes,
-            height: '300px',
+            height: '600px',
 
             selection: [],
             selectAll: false
         };
 
 
-        this.onSubmit = this.onSubmit.bind(this);
+        //  this.onSubmit = this.onSubmit.bind(this);
     }
     // this.onChange = this.onChange.bind(this);
     // this.onChange = this.onChange.bind(this);
@@ -172,7 +187,7 @@ class TableData extends React.Component {
         const selection = [];
         if (selectAll) {
             // we need to get at the internals of ReactTable
-            const wrappedInstance = this.checkboxTable.getWrappedInstance();
+            const wrappedInstance = this.FoldableTable.getWrappedInstance();
             // the 'sortedData' property contains the currently accessible records based on the filter and sort
             const currentRecords = wrappedInstance.getResolvedState().sortedData;
             // we just push all the IDs onto the selection array
@@ -226,7 +241,7 @@ class TableData extends React.Component {
         //   this.props.createMyEvent(this.state);
     };
 
-    onRefresh(e) {
+    handleClick(e) {
 
         //e.preventDefault();
 
@@ -251,9 +266,11 @@ class TableData extends React.Component {
     };
 
     render() {
+        const { classes } = this.props;
+
         //let dataList = [555];
         const { toggleSelection, toggleAll, isSelected } = this;
-        const { selection, selectAll } = this.state;
+        const { selection, selectAll, height } = this.state;
         const dataList = this.props.dataList.slice(1, );
         const { title } = this.props;
         // let lists={};
@@ -292,14 +309,14 @@ class TableData extends React.Component {
 
             <div>
                 <br />
-                <MenuTable {...this.props} handleToggle={this.handleToggle.bind(this)}
+                <MenuTable {...this.state} handleToggle={this.handleToggle.bind(this)}
                     handleChange={this.handleChange.bind(this)}
-                    onRefresh={this.onRefresh.bind(this)}
+                    handleClick={this.handleClick.bind(this)}
                     height={this.state.height}
                 />
                 <br />
-                <CheckboxTable
-                    ref={r => (this.checkboxTable = r)}
+                <FoldableTable
+                    ref={r => (this.FoldableTable = r)}
                     data={dataList}
                     columns={title}
                     {...checkboxProps}
@@ -312,6 +329,10 @@ class TableData extends React.Component {
                     pageText={'Страница'}
                     ofText={'из'}
                     rowsText={'записей'}
+                    style={{
+                        height: height // This will force the table body to overflow and scroll, since there is not enough room
+                    }}
+                    className="-striped -highlight"
                     {...this.props}
                 />
                 <br />
@@ -323,45 +344,46 @@ class TableData extends React.Component {
 }
 
 function mapStateToProps(state, ownProps) {
-    let title = [];
-    if (state.sensorsList.length == 1) {
-        title = [
+    //let title = [];
+    //if (state.sensorsList.length == 1) {
+    let title = [{
+        Header: "Время наблюдения",
+        id: "date_time",
+        accessor: "date_time"
+    }, {
+        Header: "Тип",
+        id: "typemeasure",
+        accessor: "typemeasure"
+    },
+    {
+        Header: "Значение",
+        id: "measure",
+        accessor: "measure"
+    },
+    {
+        Header: "Единицы",
+        id: "unit_name",
+        accessor: "unit_name"
+    },
 
-            {
-                Header: "Перечень данных по выбранным датчикам за период",
-                columns: [{
-                    Header: "Время наблюдения",
-                    id: "date_time",
-                    accessor: "date_time"
-                }, {
-                    Header: "Тип",
-                    id: "typemeasure",
-                    accessor: "typemeasure"
-                },
-                {
-                    Header: "Значение",
-                    id: "measure",
-                    accessor: "measure"
-                },
-                {
-                    Header: "Единицы",
-                    id: "unit_name",
-                    accessor: "unit_name"
-                },
+    {
+        Header: "ID датчика",
+        id: "serialnum",
+        accessor: d => d.serialnum,
+        foldable: true,
+        folded: true
 
-                {
-                    Header: "ID датчика",
-                    id: "serialnum",
-                    accessor: d => d.serialnum
-                },
-                {
-                    Header: "Тревога",
-                    id: "is_alert",
-                    accessor: "is_alert"
-                }]
-            }
-        ]
-    };
+    },
+    {
+        Header: "Тревога",
+        id: "is_alert",
+        accessor: "is_alert",
+        foldable: true
+
+    }]
+
+
+    //};
 
     if (state.sensorsList.length > 1) {
 
@@ -372,17 +394,13 @@ function mapStateToProps(state, ownProps) {
                 columns.push({
                     Header: _header[key],
                     id: key,
-                    accessor: key
+                    accessor: key,
+                    foldable: true
+
                 });
             }
         };
-        title = [
-
-            {
-                Header: "Перечень данных по выбранным датчикам за период",
-                columns
-            }
-        ]
+        title = columns;
     }
     return {
 
@@ -396,7 +414,10 @@ function mapStateToProps(state, ownProps) {
           deselectOnClickaway: state.deselectOnClickaway,
           showCheckboxes: state.showCheckboxes,*/
         dataList: state.dataList,
-        title: title
+        title: title,
+        dateTimeBegin: state.datePickers.dateTimeBegin,
+        dateTimeEnd: state.datePickers.dateTimeEnd
+
 
     };
 }
@@ -410,4 +431,4 @@ TableData.contextType = {
     router: PropTypes.object.isRequired
 }
 
-export default connect(mapStateToProps, { queryEvent })(withRouter(TableData));
+export default connect(mapStateToProps, { queryEvent })(withRouter(withStyles(styles)(TableData)));

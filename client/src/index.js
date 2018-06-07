@@ -1,5 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import es6x from 'es6x';
+
 //import render from 'react-dom';
 import './index.css';
 //import App from './App';
@@ -32,6 +34,8 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 
 //const logger = createLogger();
+//es6x.setOutputMethod(React.createElement); //plugin for JSX syntax
+
 injectTapEventPlugin();
 
 

@@ -17,8 +17,10 @@ import DataIcon from 'material-ui/svg-icons/action/timeline';
 
 
 import ReactTable from "react-table";
+import FoldableTableHOC from '../foldableTable/index';
+import 'react-table/react-table.css';
 
-
+import shortid from 'shortid';
 
 import checkboxHOC from "react-table/lib/hoc/selectTable";
 const CheckboxTable = checkboxHOC(ReactTable);
@@ -31,19 +33,10 @@ Object.assign(CheckboxTable, {
     ofText: 'из',
     rowsText: 'записей',
 });
-import shortid from 'shortid';
 
-import {
-    Table,
-    TableBody,
-    TableFooter,
-    TableHeader,
-    TableHeaderColumn,
-    TableRow,
-    TableRowColumn,
-} from 'material-ui/Table';
-import TextField from 'material-ui/TextField';
-import Toggle from 'material-ui/Toggle';
+
+const FoldableTable = FoldableTableHOC(CheckboxTable);
+
 
 class MeteoData extends React.Component {
     constructor(props) {
@@ -97,7 +90,7 @@ class MeteoData extends React.Component {
             enableSelectAll,
             deselectOnClickaway,
             showCheckboxes,
-            height: '300px',
+            height: '700px',
 
             selection: [],
             selectAll: false
@@ -226,13 +219,13 @@ class MeteoData extends React.Component {
         //   this.props.createMyEvent(this.state);
     };
 
-    onRefresh(e) {
+    handleClick(e) {
 
         //e.preventDefault();
 
         //this.loadData().then(data => this.setState({ sensorsList: data }));
 
-        alert('Nothing');
+     //   alert('Nothing');
 
         //   this.props.createMyEvent(this.state);
     };
@@ -253,7 +246,7 @@ class MeteoData extends React.Component {
     render() {
         //let dataList = [555];
         const { toggleSelection, toggleAll, isSelected } = this;
-        const { selection, selectAll } = this.state;
+        const { selection, selectAll, height } = this.state;
         const dataList = this.props.dataList;
         //const { title } = this.props;
         // let lists={};
@@ -288,10 +281,7 @@ class MeteoData extends React.Component {
             </div>;
 
 
-        const title = [
-            {
-                Header: "Данные метеонаблюдений",
-                columns: [{
+        const title =             [{
                     Header: "ID станции",
                     id: "station",
                     accessor: d => d.id
@@ -304,170 +294,197 @@ class MeteoData extends React.Component {
                 {
                     Header: "Внешняя температура",
                     id: "temp_out",
-                    accessor: "temp_out"
+                    accessor: "temp_out",
+                    foldable: true
                 },
                 {
                     Header: "Макс. значение темп.",
                     id: "temp_hi",
-                    accessor: "temp_hi"
+                    accessor: "temp_hi",
+                    foldable: true
                 },
                 {
                     Header: "Мин. значение темп.",
                     id: "temp_low",
-                    accessor: "temp_low"
+                    accessor: "temp_low",
+                    foldable: true
                 },
                 {
                     Header: "Влажность внешняя",
                     id: "hum_out",
-                    accessor: "hum_out"
+                    accessor: "hum_out",
+                    foldable: true
                 },
                 {
                     Header: "Точка росы",
                     id: "dew_pt",
-                    accessor: "dew_pt"
+                    accessor: "dew_pt",
+                    foldable: true
                 },
                 {
                     Header: "Скор. ветра (м/с)",
                     id: "speed_wind",
-                    accessor: "speed_wind"
+                    accessor: "speed_wind",
+                    foldable: true
                 },
                 {
                     Header: "Направление",
                     id: "dir_wind",
-                    accessor: "dir_wind"
+                    accessor: "dir_wind",
+                    foldable: true
                 },
                 {
                     Header: "Пробег ветра,км.",
-                    id: "dir_wind",
-                    accessor: "dir_wind"
+                    id: "run_wind",
+                    accessor: "run_wind",
+                    foldable: true
                 },
                 {
                     Header: "Макс. скор.",
                     id: "speed_wind_hi",
-                    accessor: "speed_wind_hi"
+                    accessor: "speed_wind_hi",
+                    foldable: true
                 },
                 {
                     Header: "Преимущ. напр.",
                     id: "dir_wind_hi",
-                    accessor: "dir_wind_hi"
+                    accessor: "dir_wind_hi",
+                    foldable: true
                 },
                 {
                     Header: "Температура на ветру",
                     id: "chill_wind",
-                    accessor: "chill_wind"
+                    accessor: "chill_wind",
+                    foldable: true
                 },
                 {
                     Header: "Тепловой индекс,C",
                     id: "heat_indx",
-                    accessor: "heat_indx"
+                    accessor: "heat_indx",
+                    foldable: true
                 },
                 {
                     Header: "Темп.-влажн. индекс",
                     id: "thw_indx",
-                    accessor: "thw_indx"
+                    accessor: "thw_indx",
+                    foldable: true
                 },
                 {
                     Header: "Темп.-солн.-влажн. индекс",
                     id: "thsw_indx",
-                    accessor: "thsw_indx"
+                    accessor: "thsw_indx",
+                    foldable: true
                 },
                 {
                     Header: "Давление",
                     id: "bar",
-                    accessor: "bar"
+                    accessor: "bar",
+                    foldable: true
                 },
                 {
                     Header: "Осадки, мм",
                     id: "rain",
-                    accessor: "rain"
+                    accessor: "rain",
+                    foldable: true
                 },
                 {
                     Header: "Интенсивн. осадков",
                     id: "rain_rate",
-                    accessor: "rain_rate"
+                    accessor: "rain_rate",
+                    foldable: true
                 },
                 {
                     Header: "Солн. радиация",
                     id: "rad_solar",
-                    accessor: "rad_solar"
+                    accessor: "rad_solar",
+                    foldable: true
                 },
                 {
                     Header: "Солн. энерг.",
                     id: "enrg_solar",
-                    accessor: "enrg_solar"
+                    accessor: "enrg_solar",
+                    foldable: true
                 },
                 {
                     Header: "Солн. рад. макс.",
                     id: "rad_solar_hi",
-                    accessor: "rad_solar_hi"
+                    accessor: "rad_solar_hi",
+                    foldable: true
                 },
                 {
                     Header: "УФ-индекс",
                     id: "uv_indx",
-                    accessor: "uv_indx"
+                    accessor: "uv_indx",
+                    foldable: true
                 },
                 {
                     Header: "Доза УФ",
                     id: "uv_dose",
-                    accessor: "uv_dose"
+                    accessor: "uv_dose",
+                    foldable: true
                 },
                 {
                     Header: "УФ индекс макс.",
                     id: "uv_hi",
-                    accessor: "uv_hi"
+                    accessor: "uv_hi",
+                    foldable: true
                 },
                 {
                     Header: "Внутр. темп.,С",
                     id: "temp_in",
-                    accessor: "temp_in"
+                    accessor: "temp_in",
+                    foldable: true
                 },
                 {
                     Header: "Влажн. внутр.",
                     id: "hum_in",
-                    accessor: "hum_in"
+                    accessor: "hum_in",
+                    foldable: true
                 },
                 {
                     Header: "Внутр. точка росы",
                     id: "dew_in",
-                    accessor: "dew_in"
+                    accessor: "dew_in",
+                    foldable: true
                 },
                 {
                     Header: "Внутр. тепл. индекс",
-                    id: "heat_in",
-                    accessor: "heat_in"
+                    id: "emc_in",
+                    accessor: "emc_in",
+                    foldable: true
                 },
                 {
                     Header: "Влагосодержание внутр.",
-                    id: "heat_in",
-                    accessor: "heat_in"
+                    id: "et",
+                    accessor: "et",
+                    foldable: true
                 },
                 {
                     Header: "Плотн. возд. внутр.",
-                    id: "heat_in",
-                    accessor: "heat_in"
+                    id: "density_air_in",
+                    accessor: "density_air_in",
+                    foldable: true
                 }
                 ]
-            }
-        ]
+            
 
         return (
 
 
             <div>
                 <br />
-                <MenuTable {...this.props} handleToggle={this.handleToggle.bind(this)}
+                <MenuTable {...this.state} handleToggle={this.handleToggle.bind(this)}
                     handleChange={this.handleChange.bind(this)}
-                    onRefresh={this.onRefresh.bind(this)}
+                    handleClick={this.handleClick.bind(this)}
                     height={this.state.height}
                 />
                 <br />
-                <CheckboxTable
+                <FoldableTable
                     ref={r => (this.checkboxTable = r)}
                     data={dataList}
                     columns={title}
                     {...checkboxProps}
                     defaultPageSize={20}
-                    className="-striped -highlight"
                     previousText={'Предыдущие'}
                     nextText={'Следующие'}
                     loadingText={'Loading...'}
@@ -475,6 +492,11 @@ class MeteoData extends React.Component {
                     pageText={'Страница'}
                     ofText={'из'}
                     rowsText={'записей'}
+                    style={{
+                        height: height // This will force the table body to overflow and scroll, since there is not enough room
+                    }}
+                    className="-striped -highlight"
+
                     {...this.props}
                 />
                 <br />

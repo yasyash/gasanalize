@@ -17,10 +17,12 @@ class ChartPage extends React.Component {
             isLoading: false,
             stationsList: [] ,
             sensorsList: [] ,
+            selectedSensors:[],
             dataList:[],
             station_actual:'',
             sensors_actual:[],  
-            chartDate:{}
+            chartDate:{},
+            macs:[] //max allowable consentration
 
         }
     }

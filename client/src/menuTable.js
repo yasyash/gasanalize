@@ -7,17 +7,18 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Settings from 'material-ui/svg-icons/action/settings';
 import ContentFilter from 'material-ui/svg-icons/content/filter-list';
 import FileFileDownload from 'material-ui/svg-icons/file/file-download';
-import TextField from 'material-ui/TextField';
 import Toggle from 'material-ui/Toggle';
 import Renew from 'material-ui/svg-icons/action/autorenew';
 import Snackbar from '@material-ui/core/Snackbar';
 import Slider from '@material-ui/core/Slide';
+import TextField from '@material-ui/core/TextField';
 
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 
 import { connect } from 'react-redux';
 
+import {dateAddAction} from './actions/dateAddAction';
 /**
  * Three controlled examples, the first allowing a single selection, the second multiple selections,
  * the third using internal state.
@@ -69,6 +70,15 @@ const styles = theme => ({
         overflow: 'hidden',
         margin: '20px auto 0',
     },
+    container: {
+        display: 'flex',
+        flexWrap: 'wrap',
+    },
+    textField: {
+        marginLeft: '0',
+        marginRight: '0',
+        width: ' 200px '
+    }
 });
 
 
@@ -90,10 +100,14 @@ class MenuTable extends Component {
             height,
             isStation,
             isLoading,
-            snack_msg
+            snack_msg,
+            dateTimeBegin,
+            dateTimeEnd,
+            isSensor
         } = props;
 
         if (isStation) { isNll = true }
+        // if (!isSensor) { isSensor = false }
 
         this.state = {
             fixedHeader,
@@ -108,7 +122,10 @@ class MenuTable extends Component {
             height,
             isStation: isNll,
             isLoading,
-            snack_msg
+            snack_msg,
+            dateTimeBegin,
+            dateTimeEnd,
+            isSensor
         };
 
 
@@ -176,8 +193,17 @@ class MenuTable extends Component {
         this.props.handleChange(event);
 
     };
+    handleRefresh = name => event => {
+       // let { state } = this;
+        this.props.handleClick();
+    };
 
-
+    handlePickerChange = (event) => {
+        const value = event.target.value;
+        const id = event.target.id;
+        
+        dateAddAction({ [id]: value });
+    };
 
     render() {
 
@@ -197,118 +223,146 @@ class MenuTable extends Component {
         return (
             //<Paper className={classes.root}>
 
-                <nav className="navbar form-control">
-                    <div className="navbar-header">
-                        <IconButton
-                            iconStyle={styles.smallIcon}
-                            style={styles.small} tooltip={'Обновить'}
-                            onClick={this.props.onRefresh}
-                        >
-                            <Renew />
+            <nav className="navbar form-control classes.container">
+                <div className="navbar-header">
+                    <IconButton
+                        iconStyle={styles.smallIcon}
+                        style={styles.small} tooltip={'Обновить'}
+                        onClick={this.handleRefresh('all')} //fake parameter for return function call
+                    >
+                        <Renew />
 
-                        </IconButton>
+                    </IconButton>
 
-                    </div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    {(this.state.isSensor) && '  данные с:    '}
+                    {(this.state.isSensor) && <TextField
+                        id="dateTimeBegin"
+                        label="начало периода"
+                        type="datetime-local"
+                        defaultValue={this.props.dateTimeBegin}
+                        className={classes.textField}
+                        // selectProps={this.state.dateTimeBegin}
+                        onChange={(event) => { this.handlePickerChange(event) }}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                    />}
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    {(this.state.isSensor) && '  по:     '}
+                    {(this.state.isSensor) && <TextField
+                        id="dateTimeEnd"
+                        label="конец периода"
+                        type="datetime-local"
+                        defaultValue={this.props.dateTimeEnd}
+                        className={classes.textField}
+                        // SelectProps ={this.state.dateTimeEnd}
+                        onChange={(event) => { this.handlePickerChange(event) }}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                    />}
+                </div>
 
-                    <div className="navbar-right">
+                <div className="navbar-right">
 
-                        <IconMenu
-                            iconButtonElement={<IconButton iconStyle={styles.smallIcon}
-                                style={styles.small} tooltip={'Настройки вида таблицы'}>
-                                <Settings />
-                            </IconButton>}
-                            onChange={this.handleChangeSingle}
-                            value={this.state.valueSingle}
-                        >
-                            <div className="form-control " style={styles.menuContainer}>
-                                <div style={styles.propContainer} >
+                    <IconMenu
+                        iconButtonElement={<IconButton iconStyle={styles.smallIcon}
+                            style={styles.small} tooltip={'Настройки вида таблицы'}>
+                            <Settings />
+                        </IconButton>}
+                        onChange={this.handleChangeSingle}
+                        value={this.state.valueSingle}
+                    >
+                        <div className="form-control " style={styles.menuContainer}>
+                            <div style={styles.propContainer} >
 
-                                    <h5>Настройка таблицы</h5>
+                                <h6>Настройка таблицы</h6>
 
-                                    <TextField
-                                        floatingLabelText="Высота окна таблицы"
-                                        defaultValue={this.state.height}
-                                        onChange={this.handleChange}
-                                    />
+                                <TextField
+                                    label="Высота окна таблицы"
+                                    defaultValue={this.state.height}
+                                    onChange={this.handleChange}
+                                />
 
-                                    <h5 style={styles.propToggleHeader}>Настройка вида таблицы</h5>
-                                    <Toggle
-                                        name="deselectOnClickaway"
-                                        label="Отмена выбора кликом"
-                                        onToggle={this.handleToggle}
-                                        defaultToggled={this.state.deselectOnClickaway}
-                                    />
-                                    <Toggle
-                                        name="stripedRows"
-                                        label="Подсветка через строку"
-                                        onToggle={this.handleToggle}
-                                        defaultToggled={this.state.stripedRows}
-                                    />
-                                    <Toggle
-                                        name="showRowHover"
-                                        label="Выделять при наведении"
-                                        onToggle={this.handleToggle}
-                                        defaultToggled={this.state.showRowHover}
-                                    />
-                                    <h5 style={styles.propToggleHeader}>Настройка выбора</h5>
-
-
-                                    <Toggle
-                                        name="fixedHeader"
-                                        label="Фиксировать верхний заголовок таблицы"
-                                        onToggle={this.handleToggle}
-                                        defaultToggled={this.state.fixedHeader}
-                                    />
-                                    <Toggle
-                                        name="fixedFooter"
-                                        label="Фиксировать нижний заголовок таблицы"
-                                        onToggle={this.handleToggle}
-                                        defaultToggled={this.state.fixedFooter}
-                                    />
-                                    <Toggle
-                                        name="showCheckboxes"
-                                        label="Показать элементы выбора"
-                                        onToggle={this.handleToggle}
-                                        defaultToggled={this.state.showCheckboxes}
-                                    />
-                                    <Toggle
-                                        name="selectable"
-                                        label="Активировать выбор записей"
-                                        onToggle={this.handleToggle}
-                                        defaultToggled={this.state.selectable}
-                                    />
+                                <h6 >Настройка вида таблицы</h6>
+                                <Toggle
+                                    name="deselectOnClickaway"
+                                    label="Отмена выбора кликом"
+                                    onToggle={this.handleToggle}
+                                    defaultToggled={this.state.deselectOnClickaway}
+                                />
+                                <Toggle
+                                    name="stripedRows"
+                                    label="Подсветка через строку"
+                                    onToggle={this.handleToggle}
+                                    defaultToggled={this.state.stripedRows}
+                                />
+                                <Toggle
+                                    name="showRowHover"
+                                    label="Выделять при наведении"
+                                    onToggle={this.handleToggle}
+                                    defaultToggled={this.state.showRowHover}
+                                />
+                                <h5 style={styles.propToggleHeader}>Настройка выбора</h5>
 
 
-                                    {(!this.state.isStation) && <Toggle
-                                        name="multiSelectable"
-                                        label="Мультивыбор записей"
-                                        onToggle={this.handleToggle}
-                                        defaultToggled={this.state.multiSelectable}
-                                    />}
+                                <Toggle
+                                    name="fixedHeader"
+                                    label="Фиксировать верхний заголовок таблицы"
+                                    onToggle={this.handleToggle}
+                                    defaultToggled={this.state.fixedHeader}
+                                />
+                                <Toggle
+                                    name="fixedFooter"
+                                    label="Фиксировать нижний заголовок таблицы"
+                                    onToggle={this.handleToggle}
+                                    defaultToggled={this.state.fixedFooter}
+                                />
+                                <Toggle
+                                    name="showCheckboxes"
+                                    label="Показать элементы выбора"
+                                    onToggle={this.handleToggle}
+                                    defaultToggled={this.state.showCheckboxes}
+                                />
+                                <Toggle
+                                    name="selectable"
+                                    label="Активировать выбор записей"
+                                    onToggle={this.handleToggle}
+                                    defaultToggled={this.state.selectable}
+                                />
 
-                                    {(!this.state.isStation) && <Toggle
-                                        name="enableSelectAll"
-                                        label="Выбор всех записей"
-                                        onToggle={this.handleToggle}
-                                        defaultToggled={this.state.enableSelectAll}
-                                    />}
-                                </div>
+
+                                {(!this.state.isStation) && <Toggle
+                                    name="multiSelectable"
+                                    label="Мультивыбор записей"
+                                    onToggle={this.handleToggle}
+                                    defaultToggled={this.state.multiSelectable}
+                                />}
+
+                                {(!this.state.isStation) && <Toggle
+                                    name="enableSelectAll"
+                                    label="Выбор всех записей"
+                                    onToggle={this.handleToggle}
+                                    defaultToggled={this.state.enableSelectAll}
+                                />}
                             </div>
+                        </div>
 
 
-                        </IconMenu>
+                    </IconMenu>
 
-                    </div>
-                    <Snackbar
-                        open={this.props.isLoading}
-                        // TransitionComponent={<Slider direction="up" />}
-                        autoHideDuration={4000}
-                        onClose={this.props.handleClose}
+                </div>
+                <Snackbar
+                    open={this.props.isLoading}
+                    // TransitionComponent={<Slider direction="up" />}
+                    autoHideDuration={4000}
+                    onClose={this.props.handleClose}
 
-                        message={<span id="message-id">{this.props.snack_msg}</span>}
+                    message={<span id="message-id">{this.props.snack_msg}</span>}
 
-                    />
-                </nav>
+                />
+            </nav>
             //</Paper>
         );
     }
@@ -333,7 +387,8 @@ function mapStateToProps(state) {
 
 MenuTable.propTypes = {
 
-    classes: PropTypes.object.isRequired
-  }
+    classes: PropTypes.object.isRequired,
+    handleClick: PropTypes.func.isRequired
+}
 
-export default withStyles(styles)(MenuTable);
+export default connect (null, {dateAddAction})(withStyles(styles)(MenuTable));

@@ -6,6 +6,7 @@ import format from 'node.date-time';
 
 import TxtFieldGroup from './stuff/txtField';
 import { queryMeteoEvent } from './actions/queryActions';
+import { setMeteoStation } from './actions/meteoAddAction';
 import MenuTable from './menuTable';
 import TableSensors from './TableSensors';
 import TableData from './TableData';
@@ -25,6 +26,11 @@ import Slider from '@material-ui/core/Slide';
 import ReactTable from "react-table";
 import checkboxHOC from "react-table/lib/hoc/selectTable";
 
+import FoldableTableHOC from '../foldableTable/index';
+import 'react-table/react-table.css';
+
+
+
 const CheckboxTable = checkboxHOC(ReactTable);
 Object.assign(CheckboxTable, {
     previousText: 'Предыдущие',
@@ -35,22 +41,12 @@ Object.assign(CheckboxTable, {
     ofText: 'из',
     rowsText: 'записей',
 });
+
+
 import shortid from 'shortid';
-import "react-table/react-table.css";
 //import './Table.css';
 //import './css/rwd-table.css';
 
-import {
-    Table,
-    TableBody,
-    TableFooter,
-    TableHeader,
-    TableHeaderColumn,
-    TableRow,
-    TableRowColumn,
-} from 'material-ui/Table';
-import TextField from 'material-ui/TextField';
-import Toggle from 'material-ui/Toggle';
 import MeteoData from './MeteoData';
 
 const styles = {
@@ -92,10 +88,12 @@ class MeteoForm extends React.Component {
             deselectOnClickaway,
             showCheckboxes,
             height,
-
+            dateTimeBegin,
+            dateTimeEnd,
             stationsList,
             sensorsList,
             dataList,
+            station_actual
 
 
         } = props;
@@ -104,13 +102,13 @@ class MeteoForm extends React.Component {
 
         this.state = {
             title: '',
-            snack_msg:'',
+            snack_msg: '',
             errors: {},
             isLoading: false,
 
-            dateTimeBegin: new Date().format('Y-MM-dd') + ' 00:00:00',
-            dateTimeEnd: new Date().format('Y-MM-dd H:m:SS'),
-            station_actual: '',
+            dateTimeBegin,
+            dateTimeEnd,
+            station_actual,
             sensors_actual: [],
             stationsList,
             sensorsList,
@@ -126,16 +124,17 @@ class MeteoForm extends React.Component {
             enableSelectAll,
             deselectOnClickaway,
             showCheckboxes,
-            height,
+            height: '300px',
 
             selection: [],
-            selectAll: false
+            selectAll: false,
+            isSensor: true
         };
 
 
         this.onClick = this.onSubmit.bind(this);
-      // this.onClose= this.handleClose.bind(this);
-       //this.onExited= this.handleClose.bind(this);
+        // this.onClose= this.handleClose.bind(this);
+        //this.onExited= this.handleClose.bind(this);
 
         //   this.onRowSelection = this.onRowSelection.bind(this);
     }
@@ -267,9 +266,10 @@ class MeteoForm extends React.Component {
         //   this.props.createMyEvent(this.state);
     };
 
-    onRefresh() {
+    handleClick() {
 
         // e.preventDefault();
+        this.setState({ dateTimeBegin: this.props.dateTimeBegin, dateTimeEnd: this.props.dateTimeEnd });
 
         this.loadData(1).then(data => {
             if (data) {
@@ -294,12 +294,13 @@ class MeteoForm extends React.Component {
         let params = {};
         // 0 - all stations, 1- all sensors of the station, 2 - selected sensors
 
-        params.period_from = this.state.dateTimeBegin;
-        params.period_to = this.state.dateTimeEnd;
+        params.period_from = this.props.dateTimeBegin;
+        params.period_to = this.props.dateTimeEnd;
         if (qtype === 1) {
             params.station = this.state.station_actual;
+            setMeteoStation(this.state.station_actual);
         }
-      
+
         let data = await (this.props.queryMeteoEvent(params));
         //console.log(data);
         return data;
@@ -308,17 +309,34 @@ class MeteoForm extends React.Component {
     //  this.setState({ [e.target.name]: e.target.value });
     //}
     componentWillMount() {
+        //meteofunc
         //const getStations = this.props.queryMeteoEvent(this.state);
         //this.setState({ stationsList: getStations });
         // this.loadData().then(data => this.setState({ stationsList: data }));
-        this.loadData(0).then(data => this.setState({ stationsList: this.setData(data) }));
+        this.loadData(0).then(data => {
+
+            if (this.props.station_actual) {
+                let selection = [];
+                if (this.props.station_actual.length > 0) {
+                    data.forEach(element => {
+                        if (element.id == this.props.station_actual) {
+                            selection.push(element._id);
+                        };
+                    });
+                    this.setState({ selection });
+                    this.setState({ station_actual: this.props.station_actual });
+                }
+            }
+
+            this.setState({ stationsList: data })
+        });
         // this.loadData().then(data => this.setState({ stationsList: data }));
 
 
     };
     render() {
         const { toggleSelection, toggleAll, isSelected } = this;
-        const { selection, selectAll, stationsList } = this.state;
+        const { selection, selectAll, stationsList, height } = this.state;
         const { loadData } = this.props;
         // var tableData = this.state.stationsList;
         // const { title, errors, isLoading } = this.state;
@@ -368,7 +386,7 @@ class MeteoForm extends React.Component {
                 columns: [{
                     Header: "ID станции",
                     id: "id",
-                    accessor: d => d.id
+                    accessor: d => d.id,
                 },
                 {
                     Header: "Наименование",
@@ -404,19 +422,19 @@ class MeteoForm extends React.Component {
                         <br />
                         <MenuTable handleToggle={this.handleToggle.bind(this)}
                             handleChange={this.handleChange.bind(this)}
-                            onRefresh={this.onRefresh.bind(this)}
+                            handleClick={this.handleClick.bind(this)}
                             isStation={true} {...this.state}
-                            handleClose = {this.handleClose.bind(this)}
+                            handleClose={this.handleClose.bind(this)}
                         />
                         <br />
 
                         <div >
                             <CheckboxTable
-                                ref={r => (this.checkboxTable = r)}
+                                ref={r => (this.CheckboxTable = r)}
                                 data={stationsList}
                                 columns={Title}
                                 {...checkboxProps}
-                                defaultPageSize={3}
+                                defaultPageSize={5}
                                 className="-striped -highlight"
                                 previousText={'Предыдущие'}
                                 nextText={'Следующие'}
@@ -425,6 +443,10 @@ class MeteoForm extends React.Component {
                                 pageText={'Страница'}
                                 ofText={'из'}
                                 rowsText={'записей'}
+                                style={{
+                                    height: height // This will force the table body to overflow and scroll, since there is not enough room
+                                }}
+
                                 {...this.state}
                             />
                             <br />
@@ -443,7 +465,7 @@ class MeteoForm extends React.Component {
                         />
 
                     </Tab>
-                    
+
 
                 </Tabs>
                 <IconButton
@@ -454,8 +476,8 @@ class MeteoForm extends React.Component {
                     <Renew />
 
                 </IconButton>
-                
-         
+
+
             </div >
         );
     }
@@ -473,7 +495,10 @@ function mapStateToProps(state) {
           enableSelectAll: state.enableSelectAll,
           deselectOnClickaway: state.deselectOnClickaway,
           showCheckboxes: state.showCheckboxes,*/
-        sensorsList: state.sensorsList
+        // sensorsList: state.sensorsList,
+        dateTimeBegin: state.datePickers.dateTimeBegin,
+        dateTimeEnd: state.datePickers.dateTimeEnd,
+        station_actual: state.meteoStation
 
 
     };
@@ -489,4 +514,4 @@ MeteoForm.contextType = {
     router: PropTypes.object.isRequired
 }
 
-export default connect(null, { queryMeteoEvent })(withRouter(MeteoForm));
+export default connect(mapStateToProps, { queryMeteoEvent })(withRouter(MeteoForm));

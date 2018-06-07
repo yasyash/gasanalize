@@ -22,9 +22,13 @@ import { addActiveStationsList, deleteActiveStationsList, getFirstActiveStations
 import ReactTable from "react-table";
 
 import checkboxHOC from "react-table/lib/hoc/selectTable";
+import FoldableTableHOC from '../foldableTable/index';
+import 'react-table/react-table.css';
 
 
 const CheckboxTable = checkboxHOC(ReactTable);
+
+
 Object.assign(CheckboxTable, {
     previousText: 'Предыдущие',
     nextText: 'Следующие',
@@ -34,19 +38,12 @@ Object.assign(CheckboxTable, {
     ofText: 'из',
     rowsText: 'записей',
 });
+
+const FoldableTable = FoldableTableHOC(CheckboxTable);
+
 import shortid from 'shortid';
 
-import {
-    Table,
-    TableBody,
-    TableFooter,
-    TableHeader,
-    TableHeaderColumn,
-    TableRow,
-    TableRowColumn,
-} from 'material-ui/Table';
-import TextField from 'material-ui/TextField';
-import Toggle from 'material-ui/Toggle';
+
 
 class TableSensors extends React.Component {
     constructor(props) {
@@ -101,14 +98,16 @@ class TableSensors extends React.Component {
             enableSelectAll,
             deselectOnClickaway,
             showCheckboxes,
-            height: '300px',
+            height: '400px',
 
             selection,
-            selectAll: false
+            selectAll: false,
+            isSensor: true
         };
 
+        // this.onClick = this.onRefresh.bind(this);
 
-        this.onSubmit = this.onSubmit.bind(this);
+        // this.onSubmit = this.onSubmit.bind(this);
 
     }
     // this.onChange = this.onChange.bind(this);
@@ -183,7 +182,7 @@ class TableSensors extends React.Component {
         const selection = [];
         if (selectAll) {
             // we need to get at the internals of ReactTable
-            const wrappedInstance = this.checkboxTable.getWrappedInstance();
+            const wrappedInstance = this.FoldableTable.getWrappedInstance();
             // the 'sortedData' property contains the currently accessible records based on the filter and sort
             const currentRecords = wrappedInstance.getResolvedState().sortedData;
             // we just push all the IDs onto the selection array
@@ -237,17 +236,17 @@ class TableSensors extends React.Component {
         //   this.props.createMyEvent(this.state);
     };
 
-    onRefresh(e) {
+    handleClick() {
         let params = {};
         //e.preventDefault();
-
+        this.setState({ dateTimeBegin: this.props.dateTimeBegin, dateTimeEnd: this.props.dateTimeEnd });
         //this.loadData().then(data => this.setState({ sensorsList: data }));
 
 
         // 0 - all stations, 1- all sensors of the station, 2 - selected sensors
         if (!isEmpty(this.state.sensors_actual)) {
-            params.period_from = this.state.dateTimeBegin;
-            params.period_to = this.state.dateTimeEnd;
+            params.period_from = this.props.dateTimeBegin;
+            params.period_to = this.props.dateTimeEnd;
 
 
             params.station = this.props.station_actual;
@@ -325,7 +324,7 @@ class TableSensors extends React.Component {
 
     render() {
         const { toggleSelection, toggleAll, isSelected } = this;
-        const { selection, selectAll } = this.state;
+        const { selection, selectAll, height } = this.state;
         const { sensorsList } = this.props;
 
         const checkboxProps = {
@@ -356,77 +355,89 @@ class TableSensors extends React.Component {
                 <em>Для сортировки по нескольким полям удерживайте клавишу Shift!</em>
             </div>;
 
-        const Title = [
+        const Title =
+
+
+
+            [{
+                Header: "Тип",
+                id: "typemeasure",
+                accessor: "typemeasure"
+            },
             {
-                Header: "Перечень датчиков сбора информации",
-                columns: [{
-                    Header: "Тип",
-                    id: "typemeasure",
-                    accessor: "typemeasure"
-                },
-                {
-                    Header: "Макс. концентрация",
-                    id: "max_consentration",
-                    accessor: "max_consentration"
-                },
-                {
-                    Header: "Макс. дневная концентрация",
-                    id: "max_day_consentration",
-                    accessor: "max_day_consentration"
-                },
-                {
-                    Header: "Ед. измерения",
-                    id: "unit_name",
-                    accessor: "unit_name"
-                }, {
-                    Header: "Время наблюдения",
-                    id: "date_time_out",
-                    accessor: "date_time_out"
-                },
-                {
-                    Header: "ID датчика",
-                    id: "serialnum",
-                    accessor: d => d.serialnum
-                },
+                Header: "Макс. показатель",
+                id: "max_consentration",
+                accessor: "max_consentration",
+                foldable: true
+            },
+            {
+                Header: "Макс. сут. показатель",
+                id: "max_day_consentration",
+                accessor: "max_day_consentration",
+                foldable: true
+            },
+            {
+                Header: "Ед. измерения",
+                id: "unit_name",
+                accessor: "unit_name",
+                foldable: true
+            }, {
+                Header: "Время наблюдения",
+                id: "date_time_out",
+                accessor: "date_time_out",
+                foldable: true,
+                folded: true
+            },
+            {
+                Header: "ID датчика",
+                id: "serialnum",
+                foldable: true,
+                accessor: d => d.serialnum,
+                folded: true
+            },
 
-                {
-                    Header: "Начало наблюдений",
-                    id: "date_time_in",
-                    accessor: "date_time_in"
-                },
-                {
-                    Header: "Период усреднения",
-                    id: "average_period",
-                    accessor: "average_period"
-                },
+            {
+                Header: "Начало наблюдений",
+                id: "date_time_in",
+                accessor: "date_time_in",
+                foldable: true,
+                folded: true
+            },
+            {
+                Header: "Период усреднения",
+                id: "average_period",
+                accessor: "average_period",
+                foldable: true,
+                folded: true
+            },
 
-                {
-                    Header: "Цвет линии на графике",
-                    id: "def_colour",
-                    accessor: "def_colour"
-                }]
-            }
-        ]
+            {
+                Header: "Цвет линии на графике",
+                id: "def_colour",
+                accessor: "def_colour",
+                foldable: true,
+                folded: true
+            }];
+
+
 
         return (
 
 
-            <div>
+            <div >
                 <br />
                 <MenuTable {...this.state} handleToggle={this.handleToggle.bind(this)}
                     handleChange={this.handleChange.bind(this)}
-                    onRefresh={this.onRefresh.bind(this)}
+                    handleClick={this.handleClick.bind(this)}
                     handleClose={this.handleClose.bind(this)}
-                    height={this.state.height}
                 />
                 <br />
-                <CheckboxTable
-                    ref={r => (this.checkboxTable = r)}
+                <FoldableTable
+                    ref={r => (this.FoldableTable = r)}
                     data={sensorsList}
                     columns={Title}
                     {...checkboxProps}
                     defaultPageSize={20}
-                    className="-striped -highlight"
                     previousText={'Предыдущие'}
                     nextText={'Следующие'}
                     loadingText={'Loading...'}
@@ -434,7 +445,13 @@ class TableSensors extends React.Component {
                     pageText={'Страница'}
                     ofText={'из'}
                     rowsText={'записей'}
+                    style={{
+                        height: height // This will force the table body to overflow and scroll, since there is not enough room
+                    }}
+                    className="-striped -highlight"
                     {...this.state}
+
+
                 />
                 <br />
                 <Tips />
@@ -474,7 +491,10 @@ function mapStateToProps(state) {
 
         sensorsList: state.activeSensorsList,
         selection: sensors,
-        station_actual: station
+        station_actual: station,
+        dateTimeBegin: state.datePickers.dateTimeBegin,
+        dateTimeEnd: state.datePickers.dateTimeEnd
+
 
     };
 }
@@ -492,4 +512,7 @@ TableSensors.contextType = {
     router: PropTypes.object.isRequired
 }
 
-export default connect(mapStateToProps, { queryEvent, addActiveSensorsList, addActiveStationsList, getFirstActiveStationsList })(withRouter(TableSensors));
+export default connect(mapStateToProps, {
+    queryEvent, addActiveSensorsList, addActiveStationsList,
+    getFirstActiveStationsList
+})(withRouter(TableSensors));
