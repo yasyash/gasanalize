@@ -180,6 +180,7 @@ class MeteoForm extends React.Component {
         }
         // update the state
         this.setState({ selection, station_actual: row.id });
+        setMeteoStation(row.id);
     };
 
     toggleAll() {
@@ -292,12 +293,11 @@ class MeteoForm extends React.Component {
 
     async    loadData(qtype) {
         let params = {};
-        // 0 - all stations, 1- all sensors of the station, 2 - selected sensors
-
+        // 0 - all stations, 1- all sensors of the station
         params.period_from = this.props.dateTimeBegin;
         params.period_to = this.props.dateTimeEnd;
         if (qtype === 1) {
-            params.station = this.state.station_actual;
+            params.station = this.props.station_actual;
             setMeteoStation(this.state.station_actual);
         }
 

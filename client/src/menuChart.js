@@ -145,8 +145,21 @@ class MenuChart extends Component {
         // this.handleChange = this.handleChange.bind (this);
 
     }
+    handleLocalChangeToggle = name => event =>{
+       // const{meteoOptions} = this.props;
+       // const{options} = this.props;
+
+        this.props.handleChangeToggle (name, event);
+       // this.setState({meteoOptions});
+       // this.setState({options});
+
+    };
+
     handleClick = event => {
         this.setState({ anchorEl: event.currentTarget });
+        this.setState({ meteoOptions: this.props.meteoOptions });
+        this.setState({ options: this.props.options });
+
     };
 
     handleClose = () => {
@@ -154,7 +167,8 @@ class MenuChart extends Component {
 
     };
     handleChange = name => event => {
-        let { options } = this.state;
+        if (this.props.checkedMeteo){
+        const { options } = this.state;
 
         // indx = options.chemical.indexOf(name);
         for (var key in options) {
@@ -163,10 +177,28 @@ class MenuChart extends Component {
 
             };
         };
-
+    
         this.setState({ options });
         this.props.hideLine({ options });
+
+    } else {
+        const { meteoOptions } = this.state;
+
+        // indx = options.chemical.indexOf(name);
+        for (var key in meteoOptions) {
+            if (meteoOptions[key].header === name) {
+                meteoOptions[key]['visible'] = event.target.checked;
+
+            };
+        };
+    
+        this.setState({ meteoOptions });
+        this.props.hideLine({ meteoOptions });
+
     };
+    };
+
+   
 
     render() {
 
@@ -218,12 +250,12 @@ class MenuChart extends Component {
                                         style: {
                                             maxHeight: ITEM_HEIGHT * ((this.props.checkedMeteo && options.length)
                                             + (!this.props.checkedMeteo && 5) + 1),
-                                            width: 250,
+                                            width: (this.props.checkedMeteo && 250)+(!this.props.checkedMeteo && 300),
                                         },
                                     }}
                                 >
 
-                                   {
+                                   {(options)&&
                                         options.map((option, i) => (this.props.checkedMeteo && 
 
 
@@ -243,10 +275,13 @@ class MenuChart extends Component {
 
                                         // 
                                     ))}
-                                    {meteoOptions.map((option, i) => (!this.props.checkedMeteo && 
+                                    { (meteoOptions)&&// if not empty
+                                        meteoOptions.map((option, i) => (!this.props.checkedMeteo && 
 
 
                                         //<MenuItem key={option.chemical} onClick={this.handleClose.bind(this)}>
+                                        <Tooltip key ={'tooltip_' + option.id} title={option.header}>
+
                                         <MenuItem key={'chart_meteo_' + option.id}>
 
                                             <Checkbox
@@ -258,7 +293,7 @@ class MenuChart extends Component {
 
                                             />{'график ' + option.header}
                                         </MenuItem>
-
+                                        </Tooltip  >
 
                                         // 
                                     ))
@@ -296,7 +331,7 @@ class MenuChart extends Component {
                                 }}
                                 disableRipple
                                 checked={this.props.checkedMeteo}
-                                onChange={this.props.handleChangeToggle('checkedMeteo')}
+                                onChange={this.handleLocalChangeToggle('checkedMeteo')}
                                 value={this.props.valueMeteo}
                             />
 
@@ -334,7 +369,7 @@ class MenuChart extends Component {
                                 }}
                                 disableRipple
                                 checked={this.props.checkedLine}
-                                onChange={this.props.handleChangeToggle('checkedLine')}
+                                onChange={this.handleLocalChangeToggle('checkedLine')}
                                 value={this.props.value}
                             />
                             <Tooltip id="tooltip-charts-view2" title="Линейный график">
