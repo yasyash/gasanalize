@@ -321,7 +321,6 @@ class TableData extends React.Component {
                     columns={title}
                     {...checkboxProps}
                     defaultPageSize={20}
-                    className="-striped -highlight"
                     previousText={'Предыдущие'}
                     nextText={'Следующие'}
                     loadingText={'Loading...'}

@@ -29,7 +29,10 @@ import { deleteSensorsList } from './actions/sensorsAddAction';
 
 import ReactTable from "react-table";
 import checkboxHOC from "react-table/lib/hoc/selectTable";
+import "react-table/react-table.css";
+
 const CheckboxTable = checkboxHOC(ReactTable);
+
 Object.assign(CheckboxTable, {
     previousText: 'Предыдущие',
     nextText: 'Следующие',
@@ -40,19 +43,10 @@ Object.assign(CheckboxTable, {
     rowsText: 'записей',
 });
 import shortid from 'shortid';
-import "react-table/react-table.css";
 //import './Table.css';
 //import './css/rwd-table.css';
 
-import {
-    Table,
-    TableBody,
-    TableFooter,
-    TableHeader,
-    TableHeaderColumn,
-    TableRow,
-    TableRowColumn,
-} from 'material-ui/Table';
+
 import TextField from 'material-ui/TextField';
 import Toggle from 'material-ui/Toggle';
 

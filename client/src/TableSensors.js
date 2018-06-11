@@ -25,11 +25,7 @@ import checkboxHOC from "react-table/lib/hoc/selectTable";
 import FoldableTableHOC from '../foldableTable/index';
 import 'react-table/react-table.css';
 
-
-const CheckboxTable = checkboxHOC(ReactTable);
-
-
-Object.assign(CheckboxTable, {
+Object.assign(ReactTable, {
     previousText: 'Предыдущие',
     nextText: 'Следующие',
     loadingText: 'Loading...',
@@ -37,7 +33,14 @@ Object.assign(CheckboxTable, {
     pageText: 'Страница',
     ofText: 'из',
     rowsText: 'записей',
+    className: "-striped -highlight"
+
 });
+
+
+const CheckboxTable = checkboxHOC(ReactTable);
+
+
 
 const FoldableTable = FoldableTableHOC(CheckboxTable);
 
@@ -334,6 +337,7 @@ class TableSensors extends React.Component {
             toggleSelection: toggleSelection.bind(this),
             toggleAll: toggleAll.bind(this),
             selectType: "checkbox",
+            className: "-striped -highlight",
             getTrProps: (s, r) => {
                 let selected = false;
                 // someone asked for an example of a background color change
@@ -418,9 +422,7 @@ class TableSensors extends React.Component {
                 foldable: true,
                 folded: true
             }];
-
-
-
+            
         return (
 
 

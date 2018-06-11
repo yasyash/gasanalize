@@ -10,7 +10,7 @@ import UserEventPage from './usereventPage'
 import TablePage from './TablePage';
 import MeteoPage from './MeteoPage';
 import ChartPage from './ChartPage';
-
+import ReportPage from './ReportPage';
 
 import Divider from 'material-ui/Divider';
 
@@ -25,6 +25,7 @@ export default (
                 <Route path="/tables" component={requireAuth(TablePage)} />
                 <Route path="/meteo" component={requireAuth(MeteoPage)} />
                 <Route path="/charts" component={requireAuth(ChartPage)} />
+                <Route path="/reports" component={requireAuth(ReportPage)} />
 
             </Switch>
         </div>

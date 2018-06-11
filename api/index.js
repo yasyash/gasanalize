@@ -12,7 +12,7 @@ import auth from './auth';
 import events from './events';
 import query from './query';
 import meteoquery from './meteoquery';
-
+import operative_query from './operative_query';
 const app = express();
 
 app.use(bodyParser.json());
@@ -22,6 +22,7 @@ app.use('/api/auth', auth);
 app.use('/api/events', events);
 app.use('/api/query', query);
 app.use('/api/meteoquery', meteoquery);
+app.use('/api/operative_query', operative_query);
 
 
 const compiler = webpack(webpackConfig);
