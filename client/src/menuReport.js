@@ -111,7 +111,22 @@ const styles = theme => ({
         marginRight: theme.spacing.unit,
         width: 250,
     },
-    _td: { textAlign: 'center' }
+    _td: { textAlign: 'center' },
+    
+    alert_macs1_ylw: {
+        backgroundColor: '#ffff1a'
+    },
+    alert_macs5_orng: {
+        backgroundColor: '#ff4d00'
+    },
+
+    alert_macs10_red: {
+        backgroundColor: '#ff0000'
+    },
+    alert_success: {
+        color: '#000000',
+        backgroundColor: '#ffffff'
+    }
 
 });
 
@@ -350,8 +365,8 @@ class MenuReport extends Component {
                         <Snackbar
                             open={this.props.isLoading}
                             // TransitionComponent={<Slider direction="up" />}
-                            autoHideDuration={4000}
-                            onClose={this.props.handleClose}
+                            autoHideDuration={3000}
+                            onClose={this.props.handleSnackClose}
 
                             message={<span id="message-id">{this.props.snack_msg}</span>}
 

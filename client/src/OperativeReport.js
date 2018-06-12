@@ -36,7 +36,23 @@ import { queryOperativeEvent, queryEvent, queryMeteoEvent } from './actions/quer
 
 const styles = theme => ({
 
-    _td: { textAlign: 'center' }
+    _td: { textAlign: 'center' },
+    alert_macs1_ylw: {
+        backgroundColor: '#ffff1a'
+    },
+    alert_macs5_orng: {
+        backgroundColor: '#ff4d00'
+    },
+
+    alert_macs10_red: {
+        backgroundColor: '#ff0000'
+    },
+    alert_success: {
+        color: '#000000',
+        backgroundColor: '#ffffff'
+    }
+
+
 
 });
 
@@ -179,16 +195,31 @@ class OperativeReport extends React.Component {
                     });
                     let sum = 0;
                     let counter = 0;
+                    let class_css;
+                    let quotient = 0;
+                    let range_macs = 0; // range of macs surplus
 
                     if (!isEmpty(filter)) {
                         filter.forEach(item => {
                             sum += item.measure;
                             counter++;
                         });
+                        quotient = (sum / counter);
+                        range_macs = quotient / element.max_m;
+                        class_css = 'alert_success';
+
+                        if (range_macs > 1)
+                            class_css = 'alert_macs1_ylw'; //outranged of a macs in 1 time
+                        if (range_macs >= 5)
+                            class_css = 'alert_macs5_orng'; //outranged of a macs in 5 times
+                        if (range_macs >= 10)
+                            class_css = 'alert_macs10_red'; //outranged of a macs in  more than 10 times
+
+
                         rows_measure.push({
                             'chemical': element.chemical + ', мг/м.куб.', 'macs': element.max_m,
                             'date': new Date(this.state.dateTimeEnd).format('dd-MM-Y'),
-                            'time': new Date().format('H:mm:SS'), 'value': (sum / counter)
+                            'time': new Date().format('H:mm:SS'), 'value': quotient, 'className': class_css
                         })
                     };
                 });
@@ -232,6 +263,8 @@ class OperativeReport extends React.Component {
                 this.setState({ 'rows_measure': rows_measure });
                 this.setState({ 'rows_service': rows_service });
 
+                this.setState({ isLoading: true });
+                this.setState({ snack_msg: 'Данные успешно загружены...' });
             }
             else {
                 this.setState({ isLoading: false })
@@ -246,7 +279,11 @@ class OperativeReport extends React.Component {
     };
 
 
+    handleSnackClose() {
+        this.setState({ isLoading: false });
+        this.setState({ isUpdated: false });
 
+    };
 
 
     componentWillMount() {
@@ -260,6 +297,7 @@ class OperativeReport extends React.Component {
         const { classes } = this.props;
         const { rows_measure } = this.state;
         const { rows_service } = this.state;
+        const { snack_msg, isLoading } = this.state;
         const alert = 'ТРЕВОГА';
         const norm = 'отсутствует';
 
@@ -312,9 +350,10 @@ class OperativeReport extends React.Component {
             <Paper >
                 <br />
                 <MenuReport
-                    {...this.props}
+                    {...this.props} snack_msg={snack_msg} isLoading={isLoading}
                     station_name={this.state.station_name}
                     handleReportChange={this.handleReportChange.bind(this)}
+                    handleSnackClose={this.handleSnackClose.bind(this)}
 
                 />
                 <Typography component="div" style={{ padding: 2 * 1 }}>
@@ -344,7 +383,7 @@ class OperativeReport extends React.Component {
                                 <td style={{ 'width': '25%' }} rowSpan="2">
                                     Наименование
                     </td>
-                                <td style={{ 'width': '20%' }} rowSpan="2">
+                                <td style={{ 'width': '20%' }} rowSpan="2" >
                                     ПДКмр, мг/м.куб.
                 </td>
                                 <td style={{ 'width': '50%' }} colSpan="3">
@@ -370,8 +409,10 @@ class OperativeReport extends React.Component {
                                         <td> {option.macs}</td>
                                         <td> {option.date}</td>
                                         <td> {option.time}</td>
-                                        <td> {option.value} </td>
-
+                                        <td className=
+                                            {classes[option.className]}>
+                                            <label style={{ padding: '0', marginBottom: '0' }} >
+                                                {option.value} </label> </td>
                                     </tr>
                                 ))}
                             <tr >
@@ -439,7 +480,7 @@ class OperativeReport extends React.Component {
                                 <td >6</td>
                                 <td >Вскрытие</td>
                                 <td >
-                                    {(!isEmpty(rows_service)) && <label style={{  padding: '0', marginBottom: '0' }} className={classnames('alert', {
+                                    {(!isEmpty(rows_service)) && <label style={{ padding: '0', marginBottom: '0' }} className={classnames('alert', {
                                         'alert-danger': rows_service.Dr === true
                                     })}> {rows_service.Dr ? alert : norm} </label>}
 
@@ -452,7 +493,7 @@ class OperativeReport extends React.Component {
                                 <td >7</td>
                                 <td >Пожар</td>
                                 <td >
-                                    {(!isEmpty(rows_service)) && <label style={{padding: '0', marginBottom: '0' }} className={classnames('alert', {
+                                    {(!isEmpty(rows_service)) && <label style={{ padding: '0', marginBottom: '0' }} className={classnames('alert', {
                                         'alert-danger': rows_service.Fr === true
                                     })}> {rows_service.Fr ? alert : norm} </label>}</td>
                             </tr>
