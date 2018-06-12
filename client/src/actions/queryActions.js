@@ -234,7 +234,7 @@ export function queryMeteoEvent(paramstr) {
 
                         });
                     });
-                   // setMeteoStation('123-321');
+                    // setMeteoStation('123-321');
                     addMeteoList(wrapData(dataTable)); // add with id for table element
 
                     return dataTable;
@@ -253,84 +253,53 @@ export function queryOperativeEvent(paramstr) {
         const data = JSON.stringify(paramstr);
         //  console.log('parameters is ', data);
 
-        return Axios.get('/api/oprative_query/', { params: { data } })
+        return Axios.get('/api/operative_query/', { params: { data } })
             .then(resp => resp.data)
             .then(data => {
-                const dataTable = [];
-                if (data.stations) {
-                    let stations = data.stations;
-                    stations.forEach(element => {
-                        dataTable.push({
-                            id: element.idd,
-                            namestation: element.namestation,
-                            updateperiod: element.updateperiod,
-                            date_time_in: new Date(element.date_time_in).format('Y-MM-dd HH:mm:SS'),
-                            date_time_out: new Date(element.date_time_out).format('Y-MM-dd HH:mm:SS')
-                        });
-                    });
-                    return wrapData(dataTable);
-                };
+                if (data.response) {
+                    let data_list = data.response[0];
+                    let sensors_list = data.response[1];
+                    var macsTable = data.response[2];
+                    let unit_name = '';
+                    let prev = '';
+                    let i = 0;
+                    var dataTable = [];
+                    var sensorsTable = [];
+                   // let macsTable = [];
 
-                if (data.sensors) {
-                    deleteMeteoList(); // add with id for table element
-
-                    let sensors = data.sensors;
-                    sensors.forEach(element => {
+                    data_list.forEach(element => {
                         dataTable.push({
-                            id: element.station,
+                            typemeasure: element.typemeasure,
+                            serialnum: element.serialnum,
                             date_time: new Date(element.date_time).format('Y-MM-dd HH:mm:SS'),
-                            temp_out: element.temp_out,
-                            temp_hi: element.temp_hi,
-                            temp_low: element.temp_low,
-                            hum_out: element.hum_out,
-                            dew_pt: element.dew_pt,
-                            speed_wind: element.speed_wind,
-                            dir_wind: element.dir_wind,
-                            run_wind: element.run_wind,
-                            speed_wind_hi: element.speed_wind_hi,
-                            dir_wind_hi: element.dir_wind_hi,
-                            chill_wind: element.chill_wind,
-                            heat_indx: element.heat_indx,
-                            thw_indx: element.thw_indx,
-                            thsw_indx: element.thsw_indx,
-                            bar: element.bar,
-                            rain: element.rain,
-                            rain_rate: element.rain_rate,
-                            rad_solar: element.rad_solar,
-                            enrg_solar: element.enrg_solar,
-                            rad_solar_hi: element.rad_solar_hi,
-                            uv_indx: element.uv_indx,
-                            uv_dose: element.uv_dose,
-                            uv_hi: element.uv_hi,
-                            heat_dd: element.heat_dd,
-                            coll_dd: element.coll_dd,
-                            temp_in: element.temp_in,
-                            hum_in: element.hum_in,
-                            dew_in: element.dew_in,
-                            heat_in: element.heat_in,
-                            emc_in: element.emc_in,
-                            density_air_in: element.density_air_in,
-                            et: element.et,
-                            samp_wind: element.samp_wind,
-                            tx_wind: element.station,
-                            recept_iss: element.recept_iss,
-                            int_arc: element.int_arc
-
+                            unit_name: unit_name,
+                            measure: element.measure,
+                            is_alert: element.is_alert ? 'тревога' : 'нет',
                         });
                     });
-                   // setMeteoStation('123-321');
-                    addMeteoList(wrapData(dataTable)); // add with id for table element
 
-                    return dataTable;
-                };
+                    sensors_list.forEach(element => {
+                        sensorsTable.push({
+                            typemeasure: element.typemeasure,
+                            serialnum: element.serialnum,
+                            unit_name: element.unit_name,
+                            is_wind_sensor: element.is_wind_sensor,
+                        });
+                    });
 
 
 
-                return dataTable;
 
+                }
+                return {dataTable, sensorsTable, macsTable};
             });
-    }
+
+
+
+
+    };
 };
+
 /* export function queryEvent(params) {
     return dispatch => {
         return Axios.get('/api/query', params).then(resp => {

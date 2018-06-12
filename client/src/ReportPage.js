@@ -2,7 +2,6 @@
 
 import React from 'react';
 import UserEventForm from './userEventForm';
-import { queryMeteoEvent } from './actions/queryActions';
 import { connect } from 'react-redux';
 
 import ReportForm from './ReportForm';

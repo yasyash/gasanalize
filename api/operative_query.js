@@ -31,49 +31,33 @@ router.get('/', authenticate, (req, resp) => {
     //    obj = JSON.parse(decodeURIComponent(query))
     //}
     const between_date = [data.period_from, data.period_to];
-//     console.log('data ', between_date);
+    //     console.log('data ', between_date);
 
-    if (isEmpty(data.station)) {
-        Stations.query({
-            where: ({ is_present: true })
-        }).fetchAll().then(stations => {
-            resp.json({ stations });
-        }).catch(err => resp.status(500).json({ error: err }));
-    } else {
-        if (isEmpty(data.sensors)) {
-            Sensors.query({
-                where: ({ is_present: true }),
-                andWhere: ({ idd: data.station })
 
-            }).fetchAll().then(sensors => {
-                resp.json({ sensors });
-            }).catch(err => resp.status(500).json({ error: err }));
-        } else {
-            Promise.join(
-                Data.query('whereBetween', 'date_time', between_date)
-                    .query('whereIn', 'serialnum', data.sensors)
-                    .orderBy('date_time', 'ASC').fetchAll()
-                    .catch(err => resp.status(500).json({ error: err })),
-                Sensors.query({
-                    select: ['serialnum', 'typemeasure', 'unit_name','def_colour'],
-                    where: ({ is_present: true }),
-                    andWhere: ({ idd: data.station }),
-                })
-                    .query('whereIn', 'serialnum', data.sensors)
-                    .fetchAll()
-                    .catch(err => resp.status(500).json({ error: err })),
-                Macs.fetchAll()
-                    .catch(err => resp.status(500).json({ error: err })),
-                ((data_list, data_sensors, consentration) => {
-                    let response = [data_list, data_sensors, consentration];
-                    resp.json({ response });
-                })
+    Promise.join(
+        Data.query('whereBetween', 'date_time', between_date)
+            .query('where', 'idd', data.station)
+            .orderBy('date_time', 'ASC').fetchAll()
+            .catch(err => resp.status(500).json({ error: err })),
+        Sensors.query({
+            select: ['serialnum', 'typemeasure', 'unit_name','is_wind_sensor'],
+            where: ({ is_present: true }),
+            andWhere: ({ idd: data.station }),
+        })
+            .fetchAll()
+            .catch(err => resp.status(500).json({ error: err })),
+        Macs.fetchAll()
+            .catch(err => resp.status(500).json({ error: err })),
+        ((data_list, data_sensors, consentration) => {
+            let response = [data_list, data_sensors, consentration];
+            resp.json({ response });
+        })
 
-            )
+    )
 
-                .catch(err => resp.status(500).json({ error: err }));
-        };
-    };
+        .catch(err => resp.status(500).json({ error: err }));
+
+
     //'whereIn', 'serialnum', data.sensors,
 
 

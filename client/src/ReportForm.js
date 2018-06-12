@@ -74,7 +74,8 @@ class ReportForm extends React.Component {
         } = props;
 
         let today = new Date();
-        today -= 1200000;
+        today -= 1200000;//20 min in milliseconds
+        today -= 14400000;
 
         this.state = {
             title: '',
@@ -83,12 +84,13 @@ class ReportForm extends React.Component {
             isLoading: false,
 
             dateTimeBegin: new Date(today).format('Y-MM-ddTHH:mm'),
-            dateTimeEnd: new Date().format('Y-MM-ddTHH:mm'),
+            dateTimeEnd: new Date(today+1200000).format('Y-MM-ddTHH:mm'),
             station_actual: '',
             sensors_actual: [],
             stationsList,
             sensorsList,
             dataList,
+            macsList: [],
             selected: [],
             selection: [],
             selectAll: false,
@@ -277,11 +279,13 @@ class ReportForm extends React.Component {
 
                 <Tabs>
                     <Tab label="Оперативный" >
-                        <OperativeReport {...this.state} />
+                        <OperativeReport {...this.state} 
+                        />
                     </Tab>
                     <Tab label="Суточный" />
                     <Tab label="Ежемесячный" />
                     <Tab label="ТЗА-4" />
+
 
 
                 </Tabs>

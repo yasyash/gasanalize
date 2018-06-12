@@ -139,7 +139,8 @@ class MenuReport extends Component {
             sensorsList,
             dataList,
             selected: [],
-            sensors_actual
+            sensors_actual,
+            station_name
         } = props;
 
         if (isStation) { isNll = true }
@@ -162,7 +163,8 @@ class MenuReport extends Component {
             sensorsList,
             dataList,
             selected: [],
-            sensors_actual
+            sensors_actual,
+            station_name
         };
 
 
@@ -226,8 +228,13 @@ class MenuReport extends Component {
     };
     };
     handleSelectChange = event => {
+        const {stationsList} = this.props;
+        let filter = stationsList.filter((item, i, arr) => {
+            return item.namestation == event.target.value;});
+
         this.setState({ [event.target.name]: event.target.value });
-        this.props.handleReportChange(event.target.value);
+        if(!isEmpty(filter)) 
+        this.props.handleReportChange({station_name: event.target.value,station_actual: filter[0].id});
       };
    
 
@@ -266,18 +273,18 @@ class MenuReport extends Component {
                         <form className={classes.root} autoComplete="off">
                         <FormControl className={classes.formControl}>
 
-                            <InputLabel htmlFor="station-actual" >Отчет по станции</InputLabel>
+                            <InputLabel htmlFor="station_name" >Отчет по станции</InputLabel>
 
                                 <Select
-                                    value={this.state.station_actual}
+                                    value={this.state.station_name}
                                    onChange={this.handleSelectChange}
                                   inputProps={{
-                                   name: 'station_actual',
-                                      id: 'station-actual',
+                                   name: 'station_name',
+                                      id: 'station_name',
                                   }}>
                                 {  (stationsList)&&// if not empty
                                         stationsList.map((option, i) => (
-                                 <MenuItem key={'report_station_' + i.toString()} value={option.id}>
+                                 <MenuItem key={option.namestation} value={option.namestation}>
                                         {option.namestation}
                                  </MenuItem>
                                  ))
