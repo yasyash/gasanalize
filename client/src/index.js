@@ -38,6 +38,9 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 injectTapEventPlugin();
 
+//var realFs = require('fs');
+//var gracefulFs = require('graceful-fs');
+//gracefulFs.gracefulify(realFs);
 
 if (sessionStorage.jwToken) {
       setAuthToken(sessionStorage.jwToken);

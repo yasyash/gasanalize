@@ -31,7 +31,7 @@ import classnames from 'classnames';
 import MenuReport from './menuReport';
 
 import { queryOperativeEvent, queryEvent, queryMeteoEvent } from './actions/queryActions';
-
+import { reportGen } from './actions/genReportActions';
 
 
 const styles = theme => ({
@@ -98,6 +98,7 @@ class OperativeReport extends React.Component {
             beginChartData: [],
             rows_measure: [],
             rows_service: {},
+            data_4_report: [],
             queryFields: {
                 'P': 'Атм. давление',
                 'Tout': 'Темп. внешняя',
@@ -218,8 +219,8 @@ class OperativeReport extends React.Component {
 
                         rows_measure.push({
                             'chemical': element.chemical + ', мг/м.куб.', 'macs': element.max_m,
-                            'date': new Date(this.state.dateTimeEnd).format('dd-MM-Y'),
-                            'time': new Date().format('H:mm:SS'), 'value': quotient, 'className': class_css
+                            'date': new Date(filter[filter.length - 1].date_time).format('dd-MM-Y'),
+                            'time': new Date(filter[filter.length - 1].date_time).format('H:mm:SS'), 'value': quotient, 'className': class_css
                         })
                     };
                 });
@@ -260,6 +261,37 @@ class OperativeReport extends React.Component {
 
                     };
                 };
+                var pollution = [];
+                var values = [];
+                var data = [];
+                // rendering of array for docx template
+                rows_measure.forEach((element, ind) => {
+                    pollution.push({
+                        num: ind + 1, chemical: element.chemical, macs: element.macs, date: element.date,
+                        time: element.time, value: element.value
+                    });
+                })
+                values.push({
+                    date: new Date().format('dd-MM-Y H:mm:SS'), pollution: pollution, P: rows_service.P,
+                    Tout: rows_service.Tout,
+                    Hout: rows_service.Hout,
+                    WindV: rows_service.WindV,
+                    WindD: rows_service.WindD,
+                    Rain: rows_service.Rain,
+                    Hin: rows_service.Hin,
+                    Ts1: rows_service.Ts1,
+                    Ts2: rows_service.Ts2,
+                    Ts3: rows_service.Ts3,
+                    Tin: rows_service.Tin,
+                    U: rows_service.U,
+                    Dr: rows_service.Dr ? 'взлом' : 'отсутствует',
+                    Fr: rows_service.Fr ? 'пожар' : 'отсутствует'
+                });
+
+                data.push({ station: this.state.station_name, values: values });
+
+                this.setState({ 'data_4_report': data });
+
                 this.setState({ 'rows_measure': rows_measure });
                 this.setState({ 'rows_service': rows_service });
 
@@ -352,12 +384,16 @@ class OperativeReport extends React.Component {
                 <MenuReport
                     {...this.props} snack_msg={snack_msg} isLoading={isLoading}
                     station_name={this.state.station_name}
+                    report_type='operative'
+                    data_4_report={this.state.data_4_report}
                     handleReportChange={this.handleReportChange.bind(this)}
                     handleSnackClose={this.handleSnackClose.bind(this)}
 
                 />
-                <Typography component="div" style={{ padding: 2 * 1 }}>
-                    <table style={{ "width": '100%' }} >
+
+                <Typography component="div" style={{ padding: 2 * 1 }} id="operative_report">
+
+                    <table style={{ "width": '100%' }} id="operative_report_table_header">
                         <tbody>
                             <tr>
                                 <td style={{ 'width': '45%' }}>Станция: {this.state.station_name}</td>
@@ -369,7 +405,7 @@ class OperativeReport extends React.Component {
                     </table>
 
 
-                    <table border="1" width="100%" className={classes._td}>
+                    <table border="1" width="100%" style={{ 'Align': 'center' }} className={classes._td} id="operative_report_table">
                         <tbody>
                             <tr>
                                 <td style={{ 'width': '100%' }} colSpan="6">
@@ -547,4 +583,4 @@ OperativeReport.contextType = {
     router: PropTypes.object.isRequired
 }
 
-export default connect(null, { queryOperativeEvent, queryMeteoEvent })(withRouter(withStyles(styles)(OperativeReport)));
+export default connect(null, { queryOperativeEvent, queryMeteoEvent, reportGen })(withRouter(withStyles(styles)(OperativeReport)));

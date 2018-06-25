@@ -13,7 +13,12 @@ import events from './events';
 import query from './query';
 import meteoquery from './meteoquery';
 import operative_query from './operative_query';
+import operative_report from './operative_report';
+
 const app = express();
+
+//var staticPath = path.join(__dirname, '/');
+//app.use(express.static(staticPath));
 
 app.use(bodyParser.json());
 
@@ -23,6 +28,7 @@ app.use('/api/events', events);
 app.use('/api/query', query);
 app.use('/api/meteoquery', meteoquery);
 app.use('/api/operative_query', operative_query);
+app.use('/api/operative_report', operative_report);
 
 
 const compiler = webpack(webpackConfig);

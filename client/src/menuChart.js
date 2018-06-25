@@ -38,6 +38,8 @@ import CheckBox from '@material-ui/icons/CheckBox';
 import blue from '@material-ui/core/colors/blue';
 import pink from '@material-ui/core/colors/pink';
 
+
+
 import { connect } from 'react-redux';
 
 
@@ -53,7 +55,14 @@ const styles = theme => ({
     },
     icon: {
         margin: theme.spacing.unit * 2,
-        color: blue[600]
+        color: blue[600],
+   
+    },
+    icon_mnu: {
+        margin: theme.spacing.unit * 2,
+        color: blue[600],
+        margin: 0
+   
     },
     iOSSwitchBase: {
         '&$iOSChecked': {
@@ -239,7 +248,7 @@ class MenuChart extends Component {
                                         aria-haspopup="false"
                                         onClick={this.handleClick}
                                     >
-                                        <MoreVertIcon className={classes.icon} />
+                                        <MoreVertIcon className={classes.icon_mnu} />
                                     </IconButton></Tooltip>
                                 <Menu
                                     id="long-menu"

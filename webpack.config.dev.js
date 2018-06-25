@@ -54,9 +54,22 @@ export default {
         {
             test: /\.ttf$/,
             use: [{ loader: 'url-loader' }]
-        }
+        },
+        {
+            test: /\.xml$/,
+            use: [{ loader: 'xml-loader' }]
+        } // will load all .xml files with xml-loader by default
+
         ]
     },
 
+    node: {
+        fs: 'empty',
+        child_process: 'empty',
+        net: 'empty',
+        tls: 'empty',
+        dns: 'empty',
+        dgram: 'empty'
 
+    }
 }
