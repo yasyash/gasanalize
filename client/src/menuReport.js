@@ -1,13 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import IconMenu from 'material-ui/IconMenu';
-import RaisedButton from 'material-ui/RaisedButton';
-import Settings from 'material-ui/svg-icons/action/settings';
-import ContentFilter from 'material-ui/svg-icons/content/filter-list';
-import FileFileDownload from 'material-ui/svg-icons/file/file-download';
-import TextField from 'material-ui/TextField';
-import Toggle from 'material-ui/Toggle';
-import Renew from 'material-ui/svg-icons/action/autorenew';
+
 import Snackbar from '@material-ui/core/Snackbar';
 import Slider from '@material-ui/core/Slide';
 
@@ -41,19 +35,23 @@ import CheckBox from '@material-ui/icons/CheckBox';
 import blue from '@material-ui/core/colors/blue';
 import pink from '@material-ui/core/colors/pink';
 
+import TextField from '@material-ui/core/TextField';
+
+
 import { connect } from 'react-redux';
 
 import isEmpty from 'lodash.isempty';
 
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-//import html2pdf from './stuff/html2pdf';
+import html2pdf from 'html2pdf.js';
 //import htmlDocx from 'html-docx-js/dist/html-docx';
 //import htmlTo from 'html2xlsx';
 import { saveAs } from 'file-saver'
 //import * as fs from 'level-filesystem';
 import canvas2pdf from 'canvas2pdf/src/canvas2pdf';
 
+import { dateAddAction } from './actions/dateAddAction';
 
 
 
@@ -128,7 +126,7 @@ const styles = theme => ({
     textField: {
         marginLeft: theme.spacing.unit,
         marginRight: theme.spacing.unit,
-        width: 250,
+        width: 150,
     },
     _td: { textAlign: 'center' },
     
@@ -276,8 +274,16 @@ const doc = new jsPDF({
     unit: 'mm',
     format: 'a4'
   })
-            const _html =  document.getElementById('operative_report');
-let dom = document.createElement('operative_report');
+
+  if (this.props.report_type == 'operative'){
+            var _html =  document.getElementById('operative_report');
+            var dom = document.createElement('operative_report');
+   };
+
+   if (this.props.report_type == 'daily'){
+            var _html =  document.getElementById('daily_report');
+            var dom = document.createElement('daily_report'); 
+    };
 dom.operative_report = _html;
 let pdfHTML = _html.childNodes[0];
 let canvas = doc.canvas;
@@ -321,7 +327,12 @@ var opt = {
     html2canvas:  { scale: 5 },
     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
   };
-var worker = html2pdf().from(_html.innerHTML).set(opt).save('OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.pdf');
+  if (this.props.report_type =='operative')
+     var worker = html2pdf().from(_html.innerHTML).set(opt).save('OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.pdf');
+
+  if (this.props.report_type =='daily')
+    var worker = html2pdf().from(_html.innerHTML).set(opt).save('DailyReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.pdf');
+
 
 /*doc.fromHTML(pdfHTML,1,1,null,(obj)=>{
     var iframe = document.createElement('iframe');
@@ -370,11 +381,18 @@ return response;
 handleWordClick = (name) => {
     const _html =  document.getElementById('operative_report');
 const text ="12345465465";
-const {dateTimeEnd} = this.state;
+const {dateTimeEnd} = this.props;
+var date ='';
+
+if (this.props.report_type =='operative')
+    date =new Date(dateTimeEnd).format('dd-MM-Y_H:mm');
+
+if (this.props.report_type =='daily')
+    date =new Date(dateTimeEnd).format('dd-MM-Y');
 
 if (!isEmpty(this.props.data_4_report)) {
 
-    this.props.reportGen( {report: this.props.report_type, station: this.props.station_name, date: new Date(dateTimeEnd).format('dd-MM-Y_H:mm'),data_4_report : this.props.data_4_report}).then(response =>{
+    this.props.reportGen( {report: this.props.report_type, station: this.props.station_name, date: date,data_4_report : this.props.data_4_report}).then(response =>{
     //var xhr = new XMLHttpRequest();
 
     var type = response.headers['content-type'];
@@ -581,6 +599,18 @@ saveAs(blob, 'OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.d
         this.props.handleReportChange({station_name: event.target.value,station_actual: filter[0].id});
       };
    
+      handlePickerChange = (event) => {
+        const value = event.target.value;
+        const id = event.target.id;
+        dateAddAction({ 'dateTimeBegin': value + 'T00:00:00' });
+        dateAddAction({ 'dateTimeEnd': value + 'T23:59:59' });
+        if (!isEmpty(this.props.station_name)){
+        this.props.handleReportChange({station_name: this.props.station_name,station_actual: this.props.station_actual,
+            'dateTimeBegin': value + 'T00:00:00', 'dateTimeEnd': value + 'T23:59:59'});
+
+        }
+
+    };
 
     render() {
 
@@ -634,11 +664,24 @@ saveAs(blob, 'OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.d
                                  ))
                                 }
                                  </Select>
+
+                   
                         </FormControl>
                         </form>
 
                         </div>
-
+                        {(this.state.report_type =='daily') && <TextField
+                        id="dateTimeBegin"
+                        label="дата отчета"
+                        type="date"
+                        defaultValue= {new Date().format('Y-MM-dd')}
+                        className={classes.textField}
+                        // selectProps={this.state.dateTimeBegin}
+                        onChange={(event) => { this.handlePickerChange(event) }}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                    />}
                         <div className={classes.root}>
                             <Tooltip id="tooltip-charts-view3" title="Экспорт в PDF">
                             <IconButton className={classes.button} onClick = {this.handleClick} aria-label="Экспорт в PDF">

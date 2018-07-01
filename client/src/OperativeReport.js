@@ -32,6 +32,7 @@ import MenuReport from './menuReport';
 
 import { queryOperativeEvent, queryEvent, queryMeteoEvent } from './actions/queryActions';
 import { reportGen } from './actions/genReportActions';
+import { dateAddAction } from './actions/dateAddAction';
 
 
 const styles = theme => ({
@@ -63,8 +64,6 @@ class OperativeReport extends React.Component {
         const {
 
             chartData,
-            dateTimeBegin,
-            dateTimeEnd,
             station_actual,
             stationsList,
             sensorsList,
@@ -75,14 +74,18 @@ class OperativeReport extends React.Component {
 
         } = props;
 
+        let today = new Date();
+         today -= 1200000;//20 min in milliseconds
+        today -= 14400000;
+
         this.state = {
             title: '',
             snack_msg: '',
             errors: {},
             isLoading: false,
 
-            dateTimeBegin,
-            dateTimeEnd,
+            dateTimeBegin: new Date(today).format('Y-MM-ddTHH:mm'),
+            dateTimeEnd: new Date(today + 1200000).format('Y-MM-ddTHH:mm'),
             station_actual,
             station_name: '',
             sensors_actual,
@@ -123,6 +126,10 @@ class OperativeReport extends React.Component {
         //this.onExited= this.handleClose.bind(this);
 
         //   this.onRowSelection = this.onRowSelection.bind(this);
+
+        dateAddAction({ 'dateTimeBegin': this.state.dateTimeBegin });
+        dateAddAction({ 'dateTimeEnd': this.state.dateTimeEnd });
+
     }
 
     static defaultProps = {
@@ -167,7 +174,7 @@ class OperativeReport extends React.Component {
 
         let params = {};
         //e.preventDefault();
-        this.setState({ dateTimeBegin: this.props.dateTimeBegin, dateTimeEnd: this.props.dateTimeEnd });
+        //  this.setState({ dateTimeBegin: this.props.dateTimeBegin, dateTimeEnd: this.props.dateTimeEnd });
         //this.loadData().then(data => this.setState({ sensorsList: data }));
 
 
@@ -220,7 +227,7 @@ class OperativeReport extends React.Component {
                         rows_measure.push({
                             'chemical': element.chemical + ', мг/м.куб.', 'macs': element.max_m,
                             'date': new Date(filter[filter.length - 1].date_time).format('dd-MM-Y'),
-                            'time': new Date(filter[filter.length - 1].date_time).format('H:mm:SS'), 'value': quotient, 'className': class_css
+                            'time': new Date(filter[filter.length - 1].date_time).format('H:mm:SS'), 'value': quotient.toFixed(8), 'className': class_css
                         })
                     };
                 });
@@ -244,7 +251,7 @@ class OperativeReport extends React.Component {
                                     sum += item.measure;
                                     counter++;
                                 });
-                                rows_service[key] = sum / counter;
+                                rows_service[key] = (sum / counter);
                             };
                         } else {
 
@@ -384,8 +391,11 @@ class OperativeReport extends React.Component {
                 <MenuReport
                     {...this.props} snack_msg={snack_msg} isLoading={isLoading}
                     station_name={this.state.station_name}
+                    dateTimeBegin={this.state.dateTimeBegin}
+                    dateTimeEnd={this.state.dateTimeEnd}
                     report_type='operative'
                     data_4_report={this.state.data_4_report}
+
                     handleReportChange={this.handleReportChange.bind(this)}
                     handleSnackClose={this.handleSnackClose.bind(this)}
 
@@ -576,7 +586,8 @@ function mapStateToProps(state) {
 OperativeReport.propTypes = {
     classes: PropTypes.object.isRequired,
     queryOperativeEvent: PropTypes.func.isRequired,    //loadData: PropTypes.func.isRequired
-    queryMeteoEvent: PropTypes.func.isRequired
+    queryMeteoEvent: PropTypes.func.isRequired,
+    reportGen: PropTypes.func.isRequired
 }
 
 OperativeReport.contextType = {

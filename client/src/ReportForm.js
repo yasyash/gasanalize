@@ -38,6 +38,7 @@ import "react-table/react-table.css";
 import isNumber from 'lodash.isnumber';
 
 import OperativeReport from './OperativeReport';
+import DailyReport from './DailyReport';
 
 const styles = theme => ({
     root: {
@@ -73,9 +74,7 @@ class ReportForm extends React.Component {
 
         } = props;
 
-        let today = new Date();
-        today -= 1200000;//20 min in milliseconds
-        today -= 14400000;
+
 
         this.state = {
             title: '',
@@ -83,8 +82,7 @@ class ReportForm extends React.Component {
             errors: {},
             isLoading: false,
 
-            dateTimeBegin: new Date(today).format('Y-MM-ddTHH:mm'),
-            dateTimeEnd: new Date(today+1200000).format('Y-MM-ddTHH:mm'),
+
             station_actual: '',
             sensors_actual: [],
             stationsList,
@@ -109,8 +107,6 @@ class ReportForm extends React.Component {
             meteoOptions: [],
             tab_no: 0
         };
-        dateAddAction({ 'dateTimeBegin': this.state.dateTimeBegin });
-        dateAddAction({ 'dateTimeEnd': this.state.dateTimeEnd });
 
 
         // this.onClick = this.onSubmit.bind(this);
@@ -279,10 +275,15 @@ class ReportForm extends React.Component {
 
                 <Tabs>
                     <Tab label="Оперативный" >
-                        <OperativeReport {...this.state} 
+                        <OperativeReport {...this.state}
                         />
                     </Tab>
-                    <Tab label="Суточный" />
+                    <Tab label="Суточный" >
+                        <DailyReport {...this.state}
+                            dateTimeBegin={new Date().format('Y-MM-ddT') + '00:00'}
+                            dateTimeEnd={new Date().format('Y-MM-ddT') + '23:59:59'}
+                        />
+                    </Tab>
                     <Tab label="Ежемесячный" />
                     <Tab label="ТЗА-4" />
 

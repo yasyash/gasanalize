@@ -45,8 +45,15 @@ router.get('/', authenticate, (req, resp) => {
     // console.log('sensors ', data.sensors[0]);
     //if (data.report == 'operative') {
     //console.log(data.html);
+    if (data.report == 'operative') {
+        var filename = 'OperativeReport_station_' + data.station + '_' + data.date + '.docx';
+        var filereport = 'operative_templ.docx' 
+    };
 
-    var filename = 'OperativeReport_station_' + data.station + '_' + data.date + '.docx';
+    if (data.report == 'daily') {
+        var filename = 'DailyReport_station_' + data.station + '_' + data.date + '.docx';
+        var filereport = 'daily_templ.docx'
+    };
     var filepath = './reports/';
 
     var table = [
@@ -145,8 +152,8 @@ router.get('/', authenticate, (req, resp) => {
     var data2 = [{
         station: 'OPTEC_M',
 
-        values: [{  
-            date:'25-06-2018 21:06:56',
+        values: [{
+            date: '25-06-2018 21:06:56',
             pollution: [{
                 num: '1',
                 chemical: 'O3, мг/м.куб.',
@@ -163,20 +170,20 @@ router.get('/', authenticate, (req, resp) => {
                 time: '17:45:00',
                 value: '0.23'
             }],
-                P: '764',
-                Tout: '27',
-                Hout: '93',
-                WindV: '0.75',
-                WindD: '145',
-                Rain: '0',
-                Hin: '27',
-                Ts1: '23',
-                Ts2: '23',
-                Ts3: '23.2',
-                Tin: '23.6',
-                U: '232.2',
-                Dr: 'нет',
-                Fr: 'нет'
+            P: '764',
+            Tout: '27',
+            Hout: '93',
+            WindV: '0.75',
+            WindD: '145',
+            Rain: '0',
+            Hin: '27',
+            Ts1: '23',
+            Ts2: '23',
+            Ts3: '23.2',
+            Tin: '23.6',
+            U: '232.2',
+            Dr: 'нет',
+            Fr: 'нет'
         }],
 
 
@@ -220,7 +227,7 @@ router.get('/', authenticate, (req, resp) => {
     resp.setHeader('Content-type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     resp.setHeader('Content-disposition', 'attachment; filename=' + filename);
 
-    carbone.render(path.resolve(filepath + 'operative_templ.docx'), data.data_4_report, function (err, result) {
+    carbone.render(path.resolve(filepath + filereport), data.data_4_report, function (err, result) {
         if (err) {
             return console.log(err);
         }
