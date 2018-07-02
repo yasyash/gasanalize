@@ -127,6 +127,10 @@ const styles = theme => ({
         marginLeft: theme.spacing.unit,
         marginRight: theme.spacing.unit,
         width: 150,
+    },textFieldWide: {
+        marginLeft: theme.spacing.unit,
+        marginRight: theme.spacing.unit,
+        width: 180,
     },
     _td: { textAlign: 'center' },
     
@@ -247,6 +251,13 @@ class MenuReport extends Component {
         // this.handleChange = this.handleChange.bind (this);
 
     }
+
+    daysInMonth = (month) => {
+        let days = 33 - new Date(new Date().getFullYear(), month, 33).getDate();
+        return days;
+
+    };
+
     handleLocalChangeToggle = name => event =>{
        // const{meteoOptions} = this.props;
        // const{options} = this.props;
@@ -389,6 +400,9 @@ if (this.props.report_type =='operative')
 
 if (this.props.report_type =='daily')
     date =new Date(dateTimeEnd).format('dd-MM-Y');
+
+if (this.props.report_type =='monthly')
+    date =new Date(dateTimeEnd).format('MM-Y');
 
 if (!isEmpty(this.props.data_4_report)) {
 
@@ -602,13 +616,28 @@ saveAs(blob, 'OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.d
       handlePickerChange = (event) => {
         const value = event.target.value;
         const id = event.target.id;
-        dateAddAction({ 'dateTimeBegin': value + 'T00:00:00' });
-        dateAddAction({ 'dateTimeEnd': value + 'T23:59:59' });
-        if (!isEmpty(this.props.station_name)){
-        this.props.handleReportChange({station_name: this.props.station_name,station_actual: this.props.station_actual,
-            'dateTimeBegin': value + 'T00:00:00', 'dateTimeEnd': value + 'T23:59:59'});
+        if (this.props.report_type=='daily'){
+            dateAddAction({ 'dateTimeBegin': value + 'T00:00:00' });
+            dateAddAction({ 'dateTimeEnd': value + 'T23:59:59' });
+            if (!isEmpty(this.props.station_name)){
+            this.props.handleReportChange({station_name: this.props.station_name,station_actual: this.props.station_actual,
+                'dateTimeBegin': value + 'T00:00:00', 'dateTimeEnd': value + 'T23:59:59'});
 
         }
+       }
+
+       if (this.props.report_type=='monthly'){
+           var dateTimeBegin =new Date( new Date(value).getFullYear(), new Date(value).getMonth(), '1','0','0').format('Y-MM-ddTHH:mm');
+           var dateTimeEnd = new Date(new Date(value).getFullYear(), new Date(value).getMonth(), this.daysInMonth(new Date(value).getMonth()), '23','59','59').format('Y-MM-ddTHH:mm:SS');
+            dateAddAction({ 'dateTimeBegin': dateTimeBegin });
+            dateAddAction({ 'dateTimeEnd': dateTimeEnd });
+
+            if (!isEmpty(this.props.station_name)){
+                this.props.handleReportChange({station_name: this.props.station_name,station_actual: this.props.station_actual,
+            'dateTimeBegin': dateTimeBegin, 'dateTimeEnd': dateTimeEnd});
+
+    }
+   }
 
     };
 
@@ -676,6 +705,19 @@ saveAs(blob, 'OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.d
                         type="date"
                         defaultValue= {new Date().format('Y-MM-dd')}
                         className={classes.textField}
+                        // selectProps={this.state.dateTimeBegin}
+                        onChange={(event) => { this.handlePickerChange(event) }}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                    />}
+
+                    {(this.state.report_type =='monthly') && <TextField
+                        id="dateTimeBegin"
+                        label="дата отчета"
+                        type="month"
+                        defaultValue= {new Date().format('Y-MM')}
+                        className={classes.textFieldWide}
                         // selectProps={this.state.dateTimeBegin}
                         onChange={(event) => { this.handlePickerChange(event) }}
                         InputLabelProps={{

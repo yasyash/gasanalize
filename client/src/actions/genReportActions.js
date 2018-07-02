@@ -18,3 +18,16 @@ export function reportGen(paramstr) {
     }
 };
 
+export function reportGet(paramstr) {
+    
+        const data = JSON.stringify(paramstr);
+        //  console.log('parameters is ', data);
+
+        return Axios.get('/api/operative_report/get', { params: { data } })
+            .then(resp => resp.data.response);
+            
+
+
+
+
+    };
