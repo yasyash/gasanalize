@@ -57,6 +57,11 @@ router.get('/', authenticate, (req, resp) => {
         var filename = 'MonthlyReport_station_' + data.station + '_' + data.date + '.docx';
         var filereport = 'monthly_templ.docx'
     };
+
+    if (data.report == 'tza4') {
+        var filename = 'TZA_4_Report_station_' + data.station + '_Substance_' + data.chemical + '_' + data.date + '.docx';
+        var filereport = 'tza4_templ.docx'
+    };
     var filepath = './reports/';
 
 
@@ -150,7 +155,34 @@ async function loadData(station, between_date, station_name) {
 
 };
 
-router.get('/get', authenticate, (req, resp) => {
+async function loadData_tza(station, between_date, station_name, chemic) {
+
+    //consoleconsole.log('loadData');
+    let data = await Promise.join(
+        Data.query('whereBetween', 'date_time', between_date)
+            .query('where', 'idd', station)
+            .query('where', 'typemeasure', chemic)
+            .orderBy('date_time', 'ASC').fetchAll()
+            .catch(err => resp.status(500).json({ error: err })),
+        Sensors.query({
+            select: ['serialnum', 'typemeasure', 'unit_name', 'is_wind_sensor'],
+            where: ({ is_present: true }),
+            andWhere: ({ idd: station }),
+        })
+            .fetchAll()
+            .catch(err => resp.status(500).json({ error: err })),
+        Macs.fetchAll()
+            .catch(err => resp.status(500).json({ error: err })),
+        ((data_list, data_sensors, consentration) => {
+            let data = [data_list, data_sensors, consentration];
+            return data;
+        })
+    )
+        .catch(err => resp.status(500).json({ error: err }));
+    return data;
+
+};
+router.get('/get_monthly', authenticate, (req, resp) => {
     //  
 
     let query = url.parse(req.url).query;
@@ -482,6 +514,245 @@ router.get('/get', authenticate, (req, resp) => {
 
 
 });
+
+router.get('/get_tza4', authenticate, (req, resp) => {
+    //  
+
+    let query = url.parse(req.url).query;
+    let obj = qs.parse(query);
+    let data = JSON.parse(obj.data);
+    let station_name = data.station_name;
+    let chemic = data.chemical;
+    const between_date = [data.period_from, data.period_to];
+    //     console.log('data ', between_date);
+
+
+    loadData_tza(data.station, between_date, station_name, chemic).then(result => {
+
+        var result_parse0 = JSON.stringify(result[0]);
+        var arr0 = JSON.parse(result_parse0);
+        var result_parse1 = JSON.stringify(result[1]);
+        var arr1 = JSON.parse(result_parse1);
+        var result_parse2 = JSON.stringify(result[2]);
+        var arr2 = JSON.parse(result_parse2);
+
+        const template_chemical = ['NO', 'NO2', 'SO2', 'H2S', 'O3', 'CO', 'PM2.5', 'PM10'];
+
+        var dataList = arr0;
+        var sensorsList = arr1;
+        var macsList = arr2;
+        var avrg_measure = [];
+        var data_raw = [];
+        var times = 0;
+        var time_frame = [];
+        var last_day = '';
+        var period_from = between_date[0];
+        var time_now = 0;
+        var Tq_sum = 0; //where Q > MAC moment
+        var n_monthly = 0;
+
+        var macs_one = macsList.filter((item, i, arr) => {
+            return (item.chemical == chemic);
+        });
+
+        if (new Date().getMonth() != new Date(period_from).getMonth()) {
+            last_day = daysInMonth(new Date(period_from).getMonth());
+        } else {
+            last_day = new Date().getDate();
+        }
+
+
+        for (var ms = 1; ms < last_day + 1; ms++) {
+
+            time_frame.push(date.format(new Date(new Date(period_from).getFullYear(), new Date(period_from).getMonth(), ms), 'DD-MM-YYYY'));
+            // console.log('date ', date.format(new Date(new Date(period_from).getFullYear(), new Date(period_from).getMonth(), ms), 'DD-MM-YYYY'));
+
+        }
+        var sumQc = 0;
+        var Qc = 0;
+        var counter = 0;
+        var Qmax = 0;
+        var Qmax_time = '-';
+        var QmaxC = 0;
+        var QmaxC_time = '-';
+        var maxQc = 0;
+        var maxQc_time = '-';
+        var counter_macs1 = 0;
+
+        var time_in = 0;
+        var time_out = 0;
+        var temp_day = [];
+        var day_now = 0;
+        var up_sec = 0;
+        var Tq_day = 0;
+        var alert_macs = false;
+        var n_daily = 0;
+        var period_in = 0; //begin of period where Q > MACs
+        var M_sumQc = 0;
+        var tza4_templ = [];
+        var dataDayList = [];
+
+        //console.log('between ', between_date);
+        time_frame.forEach((element, indx) => { //step by day
+
+            temp_day.push(indx + 1);
+            temp_day.push('непр.');
+            // console.log(' day ' + element);
+            let dataDayList = dataList.filter((item, i, arr) => {
+                time_now = date.format(new Date(item.date_time), 'DD-MM-YYYY');
+
+
+                return (element == time_now);
+            });
+            if (!isEmpty(dataDayList)) {
+                //    console.log('Macs list ', element);
+                for (var hour = 3600; hour <= 86400; hour += 3600) { //step by hour
+                    time_in = hour - 3600;//select hours data 
+                    let minutes = dataDayList.filter((item, i, arr) => {
+                        time_now = new Date(item.date_time).getHours() * 3600 +
+                            new Date(item.date_time).getMinutes() * 60 + new Date(item.date_time).getSeconds();
+
+                        return ((hour > time_now) && (time_in <= time_now));
+                    });
+
+                    if (!isEmpty(minutes)) {
+                        let sum = 0;
+                        let local_cnt = 0;
+
+                        minutes.forEach((item, indx) => { //step by minutes
+                            //         console.log('item ', item);
+                            //  console.log('measure ' + item.date_time + '  '+ item.measure);
+
+                            // let tmp = item.split(':');
+                            //let up_sec = tmp[0] * 3600 + tmp[1] * 60;
+
+                            // console.log('raw ' + up_sec);
+                            sum += item.measure;
+                            local_cnt++;
+
+                            if (item.measure > Qmax) {
+                                Qmax = item.measure;
+                                Qmax_time = date.format(new Date(item.date_time), 'HH:mm:ss');
+                            }
+
+                            if (item.measure >= macs_one.max_m) {
+                                console.log('alert');
+
+                                if (!alert_macs) {
+                                    n_daily++;
+                                    period_in = new Date(item.date_time).getHours() * 3600 +
+                                        new Date(item.date_time).getMinutes() * 60 + new Date(item.date_time).getSeconds();
+                                    //time in seconds
+                                };
+
+                                alert_macs = true;
+                            } else {
+                                if (alert_macs) {
+                                    Tq_day = Tq_day + (new Date(item.date_time).getHours() * 3600 +
+                                        new Date(item.date_time).getMinutes() * 60 + new Date(item.date_time).getSeconds()) - period_in;
+                                    //time in seconds
+                                    period_in = 0;
+                                };
+                                alert_macs = false;
+                            };
+                        });
+
+                        sum = sum / local_cnt;
+                        temp_day.push(sum.toFixed(3));
+                        sumQc += sum;
+                    } else {
+                        temp_day[1] = 'нет';
+                        temp_day.push(0);
+                    };
+                };//end 24-hours frame
+            } else {
+                temp_day[1] = 'нет';
+                temp_day.push(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+            };
+            //Tq_day = Tq_day.toFixed(0) ; 
+            Tq_sum = Tq_sum + Tq_day;
+            n_monthly = n_monthly + n_daily;
+            Qc = sumQc / 24;
+
+            M_sumQc = M_sumQc + sumQc;
+
+
+            if (Qc > QmaxC) {
+                QmaxC = Qc;
+                QmaxC_time = element;
+            }
+
+            if (Qc >= macs_one.max_d)
+                counter_macs1++;
+
+            temp_day.push(sumQc.toFixed(3), n_daily, Qc.toFixed(3), Qmax.toFixed(3), Qmax_time, Tq_day.toFixed(0));
+            tza4_templ.push(temp_day);
+            //push data should above this code
+            Qmax = 0;
+            Qmax_time = '-';
+            Tq_day = 0;
+            n_daily = 0;
+            temp_day = [];
+            sumQc = 0;
+
+        });
+
+        // M_sumQc, n_monthly, ...M(Qc) ~conter_macs1
+        // QmaxC, 
+        // QmaxC_time
+        //counter_macs1
+
+
+
+        // rendering of array for docx template
+
+        var pollution = [];
+        var values = [];
+        var data = [];
+        tza4_templ.forEach((element, ind) => {
+            pollution.push({
+                time: element[0], P: element[1], h1: element[2], h2: element[3], h3: element[4], h4: element[5],
+                h5: element[6], h6: element[7], h7: element[8], h8: element[9], h9: element[10], h10: element[11],
+                h11: element[12], h12: element[13], h13: element[14], h14: element[15], h15: element[16], h16: element[17],
+                h17: element[18], h18: element[19], h19: element[20], h20: element[21], h21: element[22],
+                h22: element[23], h23: element[24], h24: element[25], SumQc: element[26], n: element[27], Qc: element[28],
+                Qm: element[29], Tm: element[30], Tq: element[31]
+            });
+        })
+        //values.push(measure);
+        values.push({
+            chemical: chemic,
+            year: date.format(new Date(period_from), 'YYYY'),
+            month: date.format(new Date(period_from), 'MM'), pollution: pollution,
+            M_SumQc: M_sumQc.toFixed(3), M_n: n_monthly, M_Qc: counter_macs1, Max_Qc: QmaxC.toFixed(4), Tmax_Qc: QmaxC_time,
+            Sum_Dcc: counter_macs1
+        });
+
+        //  console.log('values ' + values);
+
+        data.push({ station: station_name, values: values });
+
+        let response = {};
+
+        response.tza4 = tza4_templ;
+        response.adds = {
+            M_SumQc: M_sumQc.toFixed(3), M_n: n_monthly, M_Qc: counter_macs1, Max_Qc: QmaxC.toFixed(3), Tmax_Qc: QmaxC_time,
+            Sum_Dcc: counter_macs1.toFixed(3)
+        };
+        response.data = data;
+        resp.json({ response });
+    });
+});
+
+
+
+
+
+//begin rendering
+
+
+
 
 
 

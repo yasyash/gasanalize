@@ -18,16 +18,22 @@ export function reportGen(paramstr) {
     }
 };
 
-export function reportGet(paramstr) {
+export function reportGet_monthly(paramstr) {
     
         const data = JSON.stringify(paramstr);
         //  console.log('parameters is ', data);
 
-        return Axios.get('/api/operative_report/get', { params: { data } })
+        return Axios.get('/api/operative_report/get_monthly', { params: { data } })
             .then(resp => resp.data.response);
             
+    };
 
+    export function reportGet_tza4 (paramstr) {
+    
+        const data = JSON.stringify(paramstr);
+        //  console.log('parameters is ', data);
 
-
-
+        return Axios.get('/api/operative_report/get_tza4', { params: { data } })
+            .then(resp => resp.data.response);
+            
     };

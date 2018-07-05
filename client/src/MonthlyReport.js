@@ -32,7 +32,7 @@ import MenuReport from './menuReport';
 
 import { queryOperativeEvent, queryEvent, queryMeteoEvent } from './actions/queryActions';
 import { reportGen } from './actions/genReportActions';
-import { reportGet } from './actions/genReportActions';
+import { reportGet_monthly } from './actions/genReportActions';
 
 import { dateAddAction } from './actions/dateAddAction';
 
@@ -194,7 +194,7 @@ class MonthlyReport extends React.Component {
         params.station_name =  state.station_name;
         params.get = true;
 
-        reportGet(params).then(resp => {
+        reportGet_monthly(params).then(resp => {
             if (resp) {
 
                 let avrg_measure =resp.avrg_measure;
@@ -417,11 +417,11 @@ MonthlyReport.propTypes = {
     queryOperativeEvent: PropTypes.func.isRequired,    //loadData: PropTypes.func.isRequired
     queryMeteoEvent: PropTypes.func.isRequired,
     reportGen: PropTypes.func.isRequired,
-    reportGet: PropTypes.func.isRequired
+    reportGet_monthly: PropTypes.func.isRequired
 }
 
 MonthlyReport.contextType = {
     router: PropTypes.object.isRequired
 }
 
-export default connect(mapStateToProps, { queryOperativeEvent, queryMeteoEvent, reportGen, reportGet })(withRouter(withStyles(styles)(MonthlyReport)));
+export default connect(mapStateToProps, { queryOperativeEvent, queryMeteoEvent, reportGen, reportGet_monthly })(withRouter(withStyles(styles)(MonthlyReport)));

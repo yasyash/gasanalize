@@ -240,7 +240,9 @@ class MenuReport extends Component {
             sensors_actual,
             station_name,
             report_type,
-            data_4_report
+            data_4_report,
+            chemical_list : ['NO', 'NO2', 'SO2', 'H2S', 'O3', 'CO', 'PM2.5', 'PM10'],
+            chemical:''
         };
 
 
@@ -394,6 +396,7 @@ handleWordClick = (name) => {
 const text ="12345465465";
 const {dateTimeEnd} = this.props;
 var date ='';
+var chemical = this.state.chemical;
 
 if (this.props.report_type =='operative')
     date =new Date(dateTimeEnd).format('dd-MM-Y_H:mm');
@@ -404,9 +407,13 @@ if (this.props.report_type =='daily')
 if (this.props.report_type =='monthly')
     date =new Date(dateTimeEnd).format('MM-Y');
 
+if (this.props.report_type =='tza4')
+    date =new Date(dateTimeEnd).format('MM-Y');
+
+
 if (!isEmpty(this.props.data_4_report)) {
 
-    this.props.reportGen( {report: this.props.report_type, station: this.props.station_name, date: date,data_4_report : this.props.data_4_report}).then(response =>{
+    this.props.reportGen( {report: this.props.report_type, station: this.props.station_name, date: date,data_4_report : this.props.data_4_report, chemical: chemical}).then(response =>{
     //var xhr = new XMLHttpRequest();
 
     var type = response.headers['content-type'];
@@ -609,10 +616,29 @@ saveAs(blob, 'OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.d
             return item.namestation == event.target.value;});
 
         this.setState({ [event.target.name]: event.target.value });
+        if(this.props.report_type == 'tza4'){
+            if (!isEmpty(this.state.chemical)){
+                this.props.handleReportChange({station_name: event.target.value,station_actual: filter[0].id,
+                 chemical: this.state.chemical});
+            }
+        } else {
         if(!isEmpty(filter)) 
-        this.props.handleReportChange({station_name: event.target.value,station_actual: filter[0].id});
+         this.props.handleReportChange({station_name: event.target.value,station_actual: filter[0].id});
+        }
       };
-   
+
+    handleSelectChemicalChange = event => {
+        const {stationsList} = this.props;
+        const {station_name} = this.state;
+
+        let filter = stationsList.filter((item, i, arr) => {
+            return item.namestation == station_name;});
+
+        this.setState({ [event.target.name]: event.target.value });
+        if(!isEmpty(station_name)) 
+        this.props.handleReportChange({station_name: station_name,station_actual: filter[0].id, chemical: event.target.value});
+      };
+
       handlePickerChange = (event) => {
         const value = event.target.value;
         const id = event.target.id;
@@ -621,7 +647,7 @@ saveAs(blob, 'OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.d
             dateAddAction({ 'dateTimeEnd': value + 'T23:59:59' });
             if (!isEmpty(this.props.station_name)){
             this.props.handleReportChange({station_name: this.props.station_name,station_actual: this.props.station_actual,
-                'dateTimeBegin': value + 'T00:00:00', 'dateTimeEnd': value + 'T23:59:59'});
+                'dateTimeBegin': value + 'T00:00:00', 'dateTimeEnd': value + 'T23:59:59', chemical: this.state.chemical});
 
         }
        }
@@ -634,10 +660,25 @@ saveAs(blob, 'OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.d
 
             if (!isEmpty(this.props.station_name)){
                 this.props.handleReportChange({station_name: this.props.station_name,station_actual: this.props.station_actual,
-            'dateTimeBegin': dateTimeBegin, 'dateTimeEnd': dateTimeEnd});
+                'dateTimeBegin': dateTimeBegin, 'dateTimeEnd': dateTimeEnd});
 
-    }
-   }
+            }
+         
+        }
+
+        if (this.props.report_type=='tza4'){
+            var dateTimeBegin =new Date( new Date(value).getFullYear(), new Date(value).getMonth(), '1','0','0').format('Y-MM-ddTHH:mm');
+            var dateTimeEnd = new Date(new Date(value).getFullYear(), new Date(value).getMonth(), this.daysInMonth(new Date(value).getMonth()), '23','59','59').format('Y-MM-ddTHH:mm:SS');
+             dateAddAction({ 'dateTimeBegin': dateTimeBegin });
+             dateAddAction({ 'dateTimeEnd': dateTimeEnd });
+ 
+             if (!isEmpty(this.props.station_name)&&!isEmpty(this.state.chemical)){
+                this.props.handleReportChange({station_name: this.props.station_name, station_actual: this.props.station_actual,
+                'dateTimeBegin': dateTimeBegin, 'dateTimeEnd': dateTimeEnd, chemical: this.state.chemical});
+
+              }
+          
+         }
 
     };
 
@@ -646,6 +687,7 @@ saveAs(blob, 'OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.d
         const { classes } = this.props;
         const { anchorEl } = this.state;
         const {stationsList} = this.props;
+        const {chemical_list} = this.state;
         let namestation ='';
         let filter = stationsList.filter((item, i, arr) => {
             return item.id == this.state.station_actual;});
@@ -699,7 +741,8 @@ saveAs(blob, 'OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.d
                         </form>
 
                         </div>
-                        {(this.state.report_type =='daily') && <TextField
+                        {(this.state.report_type =='daily') && 
+                        <TextField
                         id="dateTimeBegin"
                         label="дата отчета"
                         type="date"
@@ -723,7 +766,44 @@ saveAs(blob, 'OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.d
                         InputLabelProps={{
                             shrink: true,
                         }}
+
+                        
                     />}
+
+                    {(this.state.report_type =='tza4') && <TextField
+                        id="dateTimeBegin"
+                        label="дата отчета"
+                        type="month"
+                        defaultValue= {new Date().format('Y-MM')}
+                        className={classes.textFieldWide}
+                        // selectProps={this.state.dateTimeBegin}
+                        onChange={(event) => { this.handlePickerChange(event) }}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+
+                        
+                    />}
+                   {(this.state.report_type =='tza4') &&  <form className={classes.root} autoComplete="off">
+                   <FormControl className={classes.formControl}>
+                   <InputLabel htmlFor="chemical" >примесь</InputLabel>
+                              <Select
+                                    value={this.state.chemical}
+                                   onChange={this.handleSelectChemicalChange}
+                                  inputProps={{
+                                   name: 'chemical',
+                                      id: 'chemical',
+                                  }}>
+                                     {   (stationsList)&& chemical_list.map((option, i) => (
+                                 <MenuItem key={option} value={option}>
+                                        {option}
+                                 </MenuItem>
+                                 ))
+                                }
+                              </Select>
+                              </FormControl>
+                              </form>}
+
                         <div className={classes.root}>
                             <Tooltip id="tooltip-charts-view3" title="Экспорт в PDF">
                             <IconButton className={classes.button} onClick = {this.handleClick} aria-label="Экспорт в PDF">

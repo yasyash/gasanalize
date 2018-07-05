@@ -40,6 +40,7 @@ import isNumber from 'lodash.isnumber';
 import OperativeReport from './OperativeReport';
 import DailyReport from './DailyReport';
 import MonthlyReport from './MonthlyReport';
+import Tza4Report from './Tza4Report';
 
 const styles = theme => ({
     root: {
@@ -291,8 +292,12 @@ class ReportForm extends React.Component {
                             dateTimeEnd={new Date().format('Y-MM-ddT') + '23:59:59'}
                         />
                     </Tab>
-                    <Tab label="ТЗА-4" />
-
+                    <Tab label="ТЗА-4" >
+                    <Tza4Report {...this.state}
+                            dateTimeBegin={new Date().format('Y-MM-ddT') + '00:00'}
+                            dateTimeEnd={new Date().format('Y-MM-ddT') + '23:59:59'}
+                        />
+                    </Tab>
 
 
                 </Tabs>
