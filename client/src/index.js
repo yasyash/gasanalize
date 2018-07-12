@@ -29,14 +29,14 @@ import setAuthToken from './stuff/setAuthToken';
 import MainApp from './MainApp';
 import { setCurrentUser } from './actions/loginActions';
 import jwtDecode from 'jwt-decode';
-import injectTapEventPlugin from 'react-tap-event-plugin';
+//import injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 
 //const logger = createLogger();
 //es6x.setOutputMethod(React.createElement); //plugin for JSX syntax
 
-injectTapEventPlugin();
+//injectTapEventPlugin();
 
 //var realFs = require('fs');
 //var gracefulFs = require('graceful-fs');

@@ -34,9 +34,11 @@ import toUpper from 'lodash/toUpper';
 import "react-table/react-table.css";
 import isNumber from 'lodash.isnumber';
 
-import { getFtp } from './actions/adminActions';
+import { getFtp, getSoap, getUser } from './actions/adminActions';
 
 import FtpForm from './FtpForm';
+import SoapForm from './SoapForm';
+import UserForm from './UserForm';
 
 const styles = theme => ({
     root: {
@@ -103,8 +105,8 @@ class AdminForm extends React.Component {
             barThickness: null,
             beginChartData: [],
             meteoOptions: [],
-            tab_no: 0, 
-            ftp_list:[]
+            tab_no: 0,
+            ftp_list: []
         };
 
 
@@ -122,18 +124,18 @@ class AdminForm extends React.Component {
         locations: ''
     };
 
-   
+
 
 
     handleChange = (event, tab_no) => {
         this.setState({ tab_no });
     };
 
-  
 
-  
 
-   
+
+
+
 
 
 
@@ -155,18 +157,24 @@ class AdminForm extends React.Component {
                 <Tabs>
 
                     <Tab label="Пользователи" >
-
+                    <UserForm
+                            {...this.state}
+                            getUser={getUser}
+                        />
                     </Tab>
                     <Tab label="Устройства">
 
                     </Tab>
                     <Tab label="SOAP загрузка" >
-
+                        <SoapForm
+                            {...this.state}
+                            getSoap={getSoap}
+                        />
                     </Tab>
                     <Tab label="FTP выгрузка" >
                         <FtpForm
                             {...this.state}
-                            getFtp = {getFtp}
+                            getFtp={getFtp}
                         />
                     </Tab>
 
@@ -216,7 +224,7 @@ AdminForm.propTypes = {
 }
 
 AdminForm.contextType = {
-   // router: PropTypes.object.isRequired
+    // router: PropTypes.object.isRequired
 }
 
 export default (withRouter(withStyles(styles)(AdminForm)));

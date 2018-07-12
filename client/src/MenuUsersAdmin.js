@@ -22,8 +22,10 @@ import Checkbox from '@material-ui/core/Checkbox';
 
 import SvgIcon from '@material-ui/core/SvgIcon';
 
-import PlayListAdd from '@material-ui/icons/PlaylistAdd'
+import Visibility from '@material-ui/icons/Visibility'
 import PlayListAddCheck from '@material-ui/icons/PlaylistAddCheck';
+import SupervisorButton from '@material-ui/icons/SupervisorAccount'
+
 import DeleteForever from '@material-ui/icons/DeleteForever';
 import Switch from '@material-ui/core/Switch';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
@@ -152,7 +154,7 @@ const styles = theme => ({
 
 
 
-class MenuAdmin extends Component {
+class MenuUsersAdmin extends Component {
 
     constructor(props) {
         let isNll = false;
@@ -213,15 +215,17 @@ class MenuAdmin extends Component {
 
         this.props.handleDelete();
     };
-    handleAdd = (name) => {
-        this.props.handleDialogAdd();
+    handleActivate = (name) => {
+        this.props.handleActivate();
     }
     handleClose = () => {
         this.setState({ anchorEl: null });
 
     };
 
-
+    handleSupervisor = (name) => {
+        this.props.handleToggleSupervisor();
+    }
 
 
     render() {
@@ -246,15 +250,24 @@ class MenuAdmin extends Component {
                                     </Icon>
                                 </IconButton>
                             </Tooltip>
-                            <Tooltip id="tooltip-charts-view3" title="Добавить">
-                                <IconButton className={classes.button} onClick={this.handleAdd} aria-label="Добавить">
+                            <Tooltip id="tooltip-charts-view3" title="Активировать / деактивировать уч. запись">
+                                <IconButton className={classes.button} onClick={this.handleActivate} aria-label="Активировать">
 
                                     <Icon className={classes.icon} color="primary">
-                                        < PlayListAdd />
+                                        < Visibility />
+                                    </Icon>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip id="tooltip-charts-view3" title="Права администратора для уч. запись">
+                                <IconButton className={classes.button} onClick={this.handleSupervisor} aria-label="Права администратора">
+
+                                    <Icon className={classes.icon} color="primary">
+                                        < SupervisorButton />
                                     </Icon>
                                 </IconButton>
                             </Tooltip>
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
                             <Tooltip id="tooltip-charts-view4" title="Удалить">
                                 <IconButton className={classes.button} onClick={this.handleDeleteClick} aria-label="Удалить">
 
@@ -306,9 +319,9 @@ function mapStateToProps(state) {
     };
 }
 
-MenuAdmin.propTypes = {
+MenuUsersAdmin.propTypes = {
 
     classes: PropTypes.object.isRequired
 }
 
-export default (withStyles(styles)(MenuAdmin));
+export default (withStyles(styles)(MenuUsersAdmin));
