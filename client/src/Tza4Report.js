@@ -248,9 +248,9 @@ class Tza4Report extends React.Component {
 
                 />
 
-                <Typography component="div" style={{ padding: 2 * 1 }} id="monthly_report">
+                <Typography component="div" style={{ padding: 2 * 1 }} id="tza4_report">
 
-                    <table style={{ "width": '100%' }} id="monthly_report_table_header">
+                    <table style={{ "width": '100%' }} id="tza4_report_table_header">
                         <tbody>
                             <tr>
                                 <td style={{ 'width': '45%' }}>Станция: {this.state.station_name} &nbsp; &nbsp; Примесь: {this.state.chemical}  </td>
@@ -262,7 +262,7 @@ class Tza4Report extends React.Component {
                     </table>
 
 
-                    <table border="1" width="100%" style={{ 'Align': 'center' }} className={classes._td} id="monthly_report_table">
+                    <table border="1" width="100%" style={{ 'Align': 'center' }} className={classes._td} id="tza4_report_table">
                         <tbody>
 
                             <tr >

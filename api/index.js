@@ -14,6 +14,7 @@ import query from './query';
 import meteoquery from './meteoquery';
 import operative_query from './operative_query';
 import operative_report from './operative_report';
+import admin_actions from './admin_actions';
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use('/api/query', query);
 app.use('/api/meteoquery', meteoquery);
 app.use('/api/operative_query', operative_query);
 app.use('/api/operative_report', operative_report);
+app.use('/api/admin', admin_actions);
 
 
 const compiler = webpack(webpackConfig);

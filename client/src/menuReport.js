@@ -297,6 +297,16 @@ const doc = new jsPDF({
             var _html =  document.getElementById('daily_report');
             var dom = document.createElement('daily_report'); 
     };
+
+    if (this.props.report_type == 'monthly'){
+        var _html =  document.getElementById('monthly_report');
+        var dom = document.createElement('monthly_report'); 
+};
+
+if (this.props.report_type == 'tza4'){
+    var _html =  document.getElementById('tza4_report');
+    var dom = document.createElement('tza4_report'); 
+};
 dom.operative_report = _html;
 let pdfHTML = _html.childNodes[0];
 let canvas = doc.canvas;
@@ -341,10 +351,16 @@ var opt = {
     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
   };
   if (this.props.report_type =='operative')
-     var worker = html2pdf().from(_html.innerHTML).set(opt).save('OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.pdf');
+     var worker = html2pdf().from(_html.innerHTML).set(opt).save('OperativeReport_Station_'+this.props.station_name+'_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.pdf');
 
   if (this.props.report_type =='daily')
-    var worker = html2pdf().from(_html.innerHTML).set(opt).save('DailyReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.pdf');
+    var worker = html2pdf().from(_html.innerHTML).set(opt).save('DailyReport_Station_'+this.props.station_name+'_'+new Date(dateTimeEnd).format('dd-MM-Y')+'.pdf');
+
+    if (this.props.report_type =='monthly')
+    var worker = html2pdf().from(_html.innerHTML).set(opt).save('MonthlyReport_Station_'+this.props.station_name+'_'+new Date(dateTimeEnd).format('MM-Y')+'.pdf');
+
+    if (this.props.report_type =='tza4')
+    var worker = html2pdf().from(_html.innerHTML).set(opt).save('TZA4_Report_Station_'+this.props.station_name+'_Substance_'+this.state.chemical+'_'+new Date(dateTimeEnd).format('MM-Y')+'.pdf');
 
 
 /*doc.fromHTML(pdfHTML,1,1,null,(obj)=>{

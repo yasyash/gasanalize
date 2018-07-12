@@ -322,6 +322,7 @@ class TableForm extends React.Component {
     //onChange(e) {
     //  this.setState({ [e.target.name]: e.target.value });
     //}
+    
     componentWillMount() {
         //const getStations = this.props.queryEvent(this.state);
         //this.setState({ stationsList: getStations });

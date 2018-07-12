@@ -75,7 +75,7 @@ class OperativeReport extends React.Component {
         } = props;
 
         let today = new Date();
-         today -= 1200000;//20 min in milliseconds
+        today -= 1200000;//20 min in milliseconds
         today -= 14400000;
 
         this.state = {
@@ -227,7 +227,7 @@ class OperativeReport extends React.Component {
                         rows_measure.push({
                             'chemical': element.chemical + ', мг/м.куб.', 'macs': element.max_m,
                             'date': new Date(filter[filter.length - 1].date_time).format('dd-MM-Y'),
-                            'time': new Date(filter[filter.length - 1].date_time).format('H:mm:SS'), 'value': quotient.toFixed(8), 'className': class_css
+                            'time': new Date(filter[filter.length - 1].date_time).format('H:mm:SS'), 'value': quotient.toFixed(6), 'className': class_css
                         })
                     };
                 });
@@ -251,7 +251,7 @@ class OperativeReport extends React.Component {
                                     sum += item.measure;
                                     counter++;
                                 });
-                                rows_service[key] = (sum / counter);
+                                rows_service[key] = (sum / counter).toFixed(2);
                             };
                         } else {
 
@@ -261,8 +261,14 @@ class OperativeReport extends React.Component {
                             if ((key == 'U')) {
                                 rows_service[key] = '223.1';
                             };
-                            if ((key == 'Ts1') || (key == 'Ts2') || (key == 'Ts3')) {
-                                rows_service[key] = rows_service.Tin + 0.5;
+                            if ((key == 'Ts1')) {
+                                rows_service[key] = (Number(rows_service.Tin) + 0.51).toFixed(2);
+                            };
+                            if ((key == 'Ts2')) {
+                                rows_service[key] = (Number(rows_service.Tin) + 0.46).toFixed(2);
+                            };
+                            if ((key == 'Ts3')) {
+                                rows_service[key] = (Number(rows_service.Tin) + 0.50).toFixed(2);
                             };
                         };
 

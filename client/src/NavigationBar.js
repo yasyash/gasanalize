@@ -34,12 +34,24 @@ class NavigationBar extends React.Component {
       isAuthenticated = false;
       username = '';
     }
+
+    const AdminLinks = (
+      <ul className="nav navbar-nav navbar-right">
+        <li><Link to="/admin">Администрирование  &nbsp; &nbsp;</Link>
+          <Link to="/reports">Отчеты  &nbsp; &nbsp;</Link>
+          <Link to="/charts">Графики  &nbsp; &nbsp;</Link>
+          <Link to="/meteo">Метеоданные  &nbsp; &nbsp;</Link>
+          <Link to="/tables">Таблицы  &nbsp; &nbsp;</Link>
+          <a href="#" onClick={this.logout.bind(this)}>   Выход</a></li>
+      </ul>
+    );
+
     const userLinks = (
       <ul className="nav navbar-nav navbar-right">
-        <li><Link to="/reports">Отчеты  &nbsp;</Link>
-          <Link to="/charts">Графики  &nbsp;</Link>
-          <Link to="/meteo">Метеоданные  &nbsp;</Link>
-          <Link to="/tables">Таблицы  &nbsp;</Link>
+        <li><Link to="/reports">Отчеты  &nbsp; &nbsp;</Link>
+          <Link to="/charts">Графики  &nbsp; &nbsp;</Link>
+          <Link to="/meteo">Метеоданные  &nbsp; &nbsp;</Link>
+          <Link to="/tables">Таблицы  &nbsp; &nbsp;</Link>
           <a href="#" onClick={this.logout.bind(this)}>   Выход</a></li>
       </ul>
     );
@@ -66,7 +78,8 @@ class NavigationBar extends React.Component {
 
             <div className="navbar-text">
 
-              {isAuthenticated ? userLinks : guestLinks}
+              {isAuthenticated && (username == 'admin') ? AdminLinks : (isAuthenticated ? userLinks : guestLinks)}
+
 
 
             </div>
