@@ -34,11 +34,13 @@ import toUpper from 'lodash/toUpper';
 import "react-table/react-table.css";
 import isNumber from 'lodash.isnumber';
 
-import { getFtp, getSoap, getUser } from './actions/adminActions';
+import { getFtp, getSoap, getUser, getMeteo, getDev } from './actions/adminActions';
 
 import FtpForm from './FtpForm';
 import SoapForm from './SoapForm';
 import UserForm from './UserForm';
+import MeteoFormAdmin from './MeteoFormAdmin';
+import EquipmentForm from './EquipmentForm';
 
 const styles = theme => ({
     root: {
@@ -157,20 +159,32 @@ class AdminForm extends React.Component {
                 <Tabs>
 
                     <Tab label="Пользователи" >
-                    <UserForm
+                        <UserForm
                             {...this.state}
                             getUser={getUser}
                         />
                     </Tab>
-                    <Tab label="Устройства">
-
-                    </Tab>
-                    <Tab label="SOAP загрузка" >
+                    <Tab label="Cтанции наблюдения" >
                         <SoapForm
                             {...this.state}
                             getSoap={getSoap}
                         />
                     </Tab>
+
+                    <Tab label="Метеостанции">
+                        <MeteoFormAdmin
+                            {...this.state}
+                            getMeteo={getMeteo}
+                        />
+                    </Tab>
+
+                    <Tab label="Устройства">
+                        <EquipmentForm
+                            {...this.state}
+                            getDev={getDev}
+                        />
+                    </Tab>
+
                     <Tab label="FTP выгрузка" >
                         <FtpForm
                             {...this.state}

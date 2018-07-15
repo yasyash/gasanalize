@@ -27,7 +27,7 @@ import ReactTable from "react-table";
 import checkboxHOC from "react-table/lib/hoc/selectTable";
 import "react-table/react-table.css";
 import isEmpty from 'lodash.isempty';
-import { getSoap, updateSoap, deleteSoap, insertSoap, activateSoap } from './actions/adminActions';
+import { getMeteo, updateMeteo, deleteMeteo, insertMeteo } from './actions/adminActions';
 
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -43,8 +43,7 @@ import shortid from 'shortid';
 
 import TextField from 'material-ui/TextField';
 import Toggle from 'material-ui/Toggle';
-import StationsDialog from './stuff/StationsDialog';
-import MenuStation from './MenuStation';
+import MeteoDialog from './stuff/MeteoDialog';
 
 const CheckboxTable = checkboxHOC(ReactTable);
 
@@ -58,7 +57,7 @@ const styles = theme => ({
 
 
 
-class SoapForm extends React.Component {
+class MeteoFormAdmin extends React.Component {
     constructor(props) {
         super(props);
         const {
@@ -118,12 +117,9 @@ class SoapForm extends React.Component {
             isUpdated: false,
             soap_list,
             openDialog: false,
-            address: '',
-            login: '',
-            password_soap: '',
-            updateperiod: 300,
-            idd: shortid.generate(),
-            namestation: ''
+            idd: '',
+            namestation: '',
+            updateperiod: 500
 
         };
 
@@ -171,7 +167,7 @@ class SoapForm extends React.Component {
         //ONLY ON ROW MAY BE SELECTED
         // selection = key;
         this.setState({ soap_actual: row.idd });
-
+        //meteo---
         //}
         // update the state
         this.setState({ selection: key });
@@ -289,7 +285,7 @@ class SoapForm extends React.Component {
         // 0 - all stations, 1- all sensors of the station, 2 - selected sensors
         //3 - macs table
 
-        let data = await (this.props.getSoap());
+        let data = await (this.props.getMeteo());
         //console.log(data);
         return data;
     };
@@ -306,7 +302,7 @@ class SoapForm extends React.Component {
             let filter = soap_list.filter((item, i, arr) => {
                 return item.idd == this.state.soap_actual;
             });
-            this.props.updateSoap(filter).then(resp => {
+            this.props.updateMeteo(filter).then(resp => {
                 if (resp.status == 200) {
                     this.load_soap().then(data => {
                         if (data)
@@ -329,7 +325,7 @@ class SoapForm extends React.Component {
             var isReal = confirm("Вы уверены?...");
 
             if (isReal) {
-                this.props.deleteSoap(this.state.soap_actual).then(resp => {
+                this.props.deleteMeteo(this.state.soap_actual).then(resp => {
                     if (resp.status == 200) {
                         this.load_soap().then(data => {
                             if (data)
@@ -348,30 +344,9 @@ class SoapForm extends React.Component {
         }
     }
 
-    handleActivate() {
-        if (!isEmpty(String(this.state.soap_actual))) {
-
-
-            this.props.activateSoap(this.state.soap_actual).then(resp => {
-                if (resp.status == 200) {
-                    this.load_soap().then(data => {
-                        if (data)
-                            this.setState({ soap_list: data });
-
-                        this.setState({ isLoading: true });
-                        this.setState({ snack_msg: 'Станция подключена...' });
-                    });
-                } else {
-                    this.setState({ isLoading: true });
-                    this.setState({ snack_msg: 'Ошибка сервера...' });
-                };
-            });
-        };
-    };
-
-
-
     handleDialogAdd() {
+        this.setState({ idd: shortid.generate() });
+
         this.setState({ openDialog: true });
 
     }
@@ -388,28 +363,27 @@ class SoapForm extends React.Component {
     };
 
     handleAdd() {
-        //insert action station
-        let { idd, namestation, address, login, password_soap, updateperiod } = this.state;
-        if (!isEmpty(this.state.namestation)) {
-            this.props.insertSoap({ idd, namestation, address, login, password_soap, updateperiod })
-                .then(resp => {
-                    //this.setState({ openDialog: false });
+        //insert action
+        let { namestation, idd, updateperiod } = this.state;
+        this.props.insertMeteo({ namestation, idd, updateperiod })
+            .then(resp => {
+                this.setState({ openDialog: false });
 
-                    if (resp.status == 200) {
-                        this.load_soap().then(data => {
-                            if (data)
-                                this.setState({ soap_list: data });
+                if (resp.status == 200) {
+                    this.load_soap().then(data => {
+                        if (data)
+                            this.setState({ soap_list: data });
 
-                            this.setState({ isLoading: true });
-                            this.setState({ snack_msg: 'Станция подключена...' });
-
-                        });
-                    } else {
                         this.setState({ isLoading: true });
-                        this.setState({ snack_msg: 'Ошибка сервера...' });
-                    };
-                });;
-        }
+                        this.setState({ snack_msg: 'Станция подключена...' });
+
+                    });
+                } else {
+                    this.setState({ isLoading: true });
+                    this.setState({ snack_msg: 'Ошибка сервера...' });
+                };
+            });;
+
 
     };
 
@@ -478,7 +452,7 @@ class SoapForm extends React.Component {
             </div>;
         const Title = [
             {
-                Header: "Перечень станций наблюдения и SOAP серверов",
+                Header: "Перечень метеостанций на постах наблюдения",
                 columns: [
                     {
                         Header: "Наименование станции",
@@ -497,46 +471,13 @@ class SoapForm extends React.Component {
                     },
 
                     {
-                        Header: "Станция в работе",
-                        id: "is_present",
-                        accessor: "is_present",
-
-                    },
-
-                    {
-                        Header: "Адрес сервера",
-                        id: "address",
-                        accessor: "address",
-                        accessor: d => d.id,
-                        Cell: this.renderEditable
-
-                    },
-                    {
-                        Header: "Логин",
-                        id: "login",
-                        accessor: "login",
-                        Cell: this.renderEditable
-
-                    },
-                    {
-                        Header: "Пароль",
-                        id: "password_soap",
-                        accessor: "password_soap",
-                        Cell: this.renderEditable
-
-                    },
-                    {
                         Header: "Период опроса, сек.",
                         id: "updateperiod",
                         accessor: "updateperiod",
                         Cell: this.renderEditable
 
                     },
-                    {
-                        Header: "Права доступа",
-                        id: "useraccessright",
-                        accessor: "useraccessright",
-                    },
+
                     {
                         Header: "Дата добавления",
                         id: "date_time_in",
@@ -553,20 +494,20 @@ class SoapForm extends React.Component {
 
             <Paper className={classes.root}>
                 <br />
-                <MenuStation
+                <MenuAdmin
                     {...this.props} snack_msg={snack_msg} isLoading={isLoading}
-                    handleActivate={this.handleActivate.bind(this)}
+
                     handleSnackClose={this.handleSnackClose.bind(this)}
                     handleUpdate={this.handleUpdate.bind(this)}
                     handleDelete={this.handleDelete.bind(this)}
                     handleDialogAdd={this.handleDialogAdd.bind(this)}
                     data_actual={this.state.soap_actual}
                 />
-                <StationsDialog openDialog={this.state.openDialog}
+                <MeteoDialog openDialog={this.state.openDialog}
                     handleDialogClose={this.handleDialogClose.bind(this)}
                     handleAdd={this.handleAdd.bind(this)}
                     handleChange={this.handleChange.bind(this)}
-                    updateperiod={this.state.updateperiod}
+                    title={'Введите данные метеостанции:'}
                     idd={this.state.idd} />
 
 
@@ -624,19 +565,18 @@ function mapStateToProps(state) {
 }
 
 
-SoapForm.propTypes = {
-    getSoap: PropTypes.func.isRequired,
-    updateSoap: PropTypes.func.isRequired,
-    deleteSoap: PropTypes.func.isRequired,
-    insertSoap: PropTypes.func.isRequired,
-    activateSoap: PropTypes.func.isRequired,
+MeteoFormAdmin.propTypes = {
+    getMeteo: PropTypes.func.isRequired,
+    updateMeteo: PropTypes.func.isRequired,
+    deleteMeteo: PropTypes.func.isRequired,
+    insertMeteo: PropTypes.func.isRequired,
     classes: PropTypes.object.isRequired
 }
 
-SoapForm.contextType = {
+MeteoFormAdmin.contextType = {
     router: PropTypes.object.isRequired
 }
 
 export default connect(null, {
-    getSoap, updateSoap, deleteSoap, insertSoap, activateSoap
-})(withRouter(withStyles(styles)(SoapForm)));
+    getMeteo, updateMeteo, deleteMeteo, insertMeteo
+})(withRouter(withStyles(styles)(MeteoFormAdmin)));

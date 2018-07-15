@@ -27,7 +27,7 @@ import ReactTable from "react-table";
 import checkboxHOC from "react-table/lib/hoc/selectTable";
 import "react-table/react-table.css";
 import isEmpty from 'lodash.isempty';
-import { getSoap, updateSoap, deleteSoap, insertSoap, activateSoap } from './actions/adminActions';
+import { getDev, updateDev, deleteDev, insertDev } from './actions/adminActions';
 
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -43,8 +43,7 @@ import shortid from 'shortid';
 
 import TextField from 'material-ui/TextField';
 import Toggle from 'material-ui/Toggle';
-import StationsDialog from './stuff/StationsDialog';
-import MenuStation from './MenuStation';
+import DeviceDialog from './stuff/DeviceDialog';
 
 const CheckboxTable = checkboxHOC(ReactTable);
 
@@ -58,7 +57,7 @@ const styles = theme => ({
 
 
 
-class SoapForm extends React.Component {
+class EquipmentForm extends React.Component {
     constructor(props) {
         super(props);
         const {
@@ -79,7 +78,7 @@ class SoapForm extends React.Component {
             dataList,
             dateTimeBegin,
             dateTimeEnd,
-            soap_list
+            dev_list
 
 
         } = props;
@@ -94,7 +93,7 @@ class SoapForm extends React.Component {
 
             dateTimeBegin, //new Date().format('Y-MM-dd') + 'T00:00',
             dateTimeEnd, //new Date().format('Y-MM-ddTH:mm'),
-            soap_actual: '',
+            dev_actual: '',
             sensors_actual: [],
             stationsList,
             sensorsList,
@@ -116,14 +115,19 @@ class SoapForm extends React.Component {
             selectAll: false,
 
             isUpdated: false,
-            soap_list,
+            dev_list,
             openDialog: false,
-            address: '',
-            login: '',
-            password_soap: '',
-            updateperiod: 300,
-            idd: shortid.generate(),
-            namestation: ''
+            periods: 1200,
+            unit_name: 'мг/м3',
+            idd: '',
+            serialnum: '',
+            typemeasure: '',
+            max_consentration: 0,
+            max_day_consentration: 0,
+            def_colour: 0,
+            is_meteo: false,
+            meteo_field: ''
+
 
         };
 
@@ -162,15 +166,16 @@ class SoapForm extends React.Component {
         //       ...selection.slice(0, keyIndex),
         //       ...selection.slice(keyIndex + 1)
         //  ];
-        //  if (row.id == this.state.soap_actual) {
-        //       this.setState({ soap_actual: '' });
+        //  if (row.id == this.state.dev_actual) {
+        //       this.setState({ dev_actual: '' });
         //  };
 
         // } else {
         // it does not exist so add it
         //ONLY ON ROW MAY BE SELECTED
         // selection = key;
-        this.setState({ soap_actual: row.idd });
+        this.setState({ dev_actual: row.serialnum });
+        this.setState({ idd: row.idd });
 
         //}
         // update the state
@@ -221,7 +226,7 @@ class SoapForm extends React.Component {
     };
 
     //// end of table fuctions
-
+    //equipmnt tgl
     handleToggle(event, toggled) {
         this.setState({
             [event.target.name]: toggled
@@ -230,16 +235,13 @@ class SoapForm extends React.Component {
 
 
 
-    handleChange(event) {
-        this.setState({ height: event.target.value });
-    };
 
     handleRowSelection(selectedRows) {
-        let ftp = (this.state.soap_list[selectedRows].id);
+        let ftp = (this.state.dev_list[selectedRows].id);
 
         this.setState({
             selected: selectedRows,
-            soap_actual: ftp
+            dev_actual: ftp
         });
     };
 
@@ -273,23 +275,23 @@ class SoapForm extends React.Component {
                 contentEditable
                 suppressContentEditableWarning
                 onBlur={e => {
-                    const data = [...this.state.soap_list];
+                    const data = [...this.state.dev_list];
                     data[cellInfo.index][cellInfo.column.id] = e.target.innerHTML;
-                    this.setState({ soap_list: data });
+                    this.setState({ dev_list: data });
                 }}
                 dangerouslySetInnerHTML={{
-                    __html: this.state.soap_list[cellInfo.index][cellInfo.column.id]
+                    __html: this.state.dev_list[cellInfo.index][cellInfo.column.id]
                 }}
             />
         );
     } I
 
-    async    load_soap() {
+    async    load_user() {
         let params = {};
         // 0 - all stations, 1- all sensors of the station, 2 - selected sensors
         //3 - macs table
 
-        let data = await (this.props.getSoap());
+        let data = await (this.props.getDev());
         //console.log(data);
         return data;
     };
@@ -301,17 +303,18 @@ class SoapForm extends React.Component {
     };
 
     handleUpdate() {
-        if (!isEmpty(this.state.soap_actual)) {
-            const { soap_list } = this.state;
-            let filter = soap_list.filter((item, i, arr) => {
-                return item.idd == this.state.soap_actual;
+        //equipment update
+        if (!isEmpty(String(this.state.dev_actual))) {
+            const { dev_list } = this.state;
+            let filter = dev_list.filter((item, i, arr) => {
+                return item.serialnum == String(this.state.dev_actual);
             });
-            this.props.updateSoap(filter).then(resp => {
+            this.props.updateDev(filter).then(resp => {
                 if (resp.status == 200) {
-                    this.load_soap().then(data => {
+                    this.load_user().then(data => {
                         if (data)
-                            this.setState({ soap_list: data });
-                        this.setState({ soap_actual: '' });
+                            this.setState({ dev_list: data });
+                        this.setState({ dev_actual: '' });
 
                         this.setState({ isLoading: true });
                         this.setState({ snack_msg: 'Данные успешно обновлены...' });
@@ -324,17 +327,19 @@ class SoapForm extends React.Component {
         }
     }
 
+
+
     handleDelete() {
-        if (!isEmpty(this.state.soap_actual)) {
+        if (!isEmpty(String(this.state.dev_actual))) {
             var isReal = confirm("Вы уверены?...");
 
             if (isReal) {
-                this.props.deleteSoap(this.state.soap_actual).then(resp => {
+                this.props.deleteDev(this.state.dev_actual).then(resp => {
                     if (resp.status == 200) {
-                        this.load_soap().then(data => {
+                        this.load_user().then(data => {
                             if (data)
-                                this.setState({ soap_list: data });
-                            this.setState({ soap_actual: '' });
+                                this.setState({ dev_list: data });
+                            this.setState({ dev_actual: '' });
 
                             this.setState({ isLoading: true });
                             this.setState({ snack_msg: 'Данные удалены...' });
@@ -348,30 +353,9 @@ class SoapForm extends React.Component {
         }
     }
 
-    handleActivate() {
-        if (!isEmpty(String(this.state.soap_actual))) {
-
-
-            this.props.activateSoap(this.state.soap_actual).then(resp => {
-                if (resp.status == 200) {
-                    this.load_soap().then(data => {
-                        if (data)
-                            this.setState({ soap_list: data });
-
-                        this.setState({ isLoading: true });
-                        this.setState({ snack_msg: 'Станция подключена...' });
-                    });
-                } else {
-                    this.setState({ isLoading: true });
-                    this.setState({ snack_msg: 'Ошибка сервера...' });
-                };
-            });
-        };
-    };
-
-
-
     handleDialogAdd() {
+        this.setState({ serialnum: shortid.generate() });
+
         this.setState({ openDialog: true });
 
     }
@@ -381,44 +365,86 @@ class SoapForm extends React.Component {
     };
 
     handleChange = name => event => {
-        //getFTPFunc
+        //changeField
+        if (name == 'meteo_field') {
+            if (event.target.value == 'bar')
+                this.setState({
+                    'typemeasure': 'Атм. давление',
+                });
+
+            if (event.target.value == 'temp_out')
+                this.setState({
+                    'typemeasure': 'Темп. внешняя',
+                });
+
+            if (event.target.value == 'hum_out')
+                this.setState({
+                    'typemeasure': 'Влажность внеш.',
+                });
+            if (event.target.value == 'speed_wind')
+                this.setState({
+                    'typemeasure': 'Скорость ветра',
+                });
+            if (event.target.value == 'dir_wind')
+                this.setState({
+                    'typemeasure': 'Направление ветра',
+                });
+            if (event.target.value == 'rain')
+                this.setState({
+                    'typemeasure': 'Интенс. осадков',
+                });
+            if (event.target.value == 'uv_dose')
+                this.setState({
+                    'typemeasure': 'Гамма-излучение',
+                });
+            if (event.target.value == 'temp_in')
+                this.setState({
+                    'typemeasure': 'Темп. внутренняя',
+                });
+            if (event.target.value == 'hum_in')
+                this.setState({
+                    'typemeasure': 'Влажность внутр.',
+                });
+
+
+        }
         this.setState({
             [name]: event.target.value,
         });
     };
 
     handleAdd() {
-        //insert action station
-        let { idd, namestation, address, login, password_soap, updateperiod } = this.state;
-        if (!isEmpty(this.state.namestation)) {
-            this.props.insertSoap({ idd, namestation, address, login, password_soap, updateperiod })
-                .then(resp => {
-                    //this.setState({ openDialog: false });
+        //insert action
+        let { idd, typemeasure, serialnum, unit_name, max_consentration,
+            max_day_consentration, def_colour, is_meteo, meteo_field } = this.state;
+        this.props.insertDev({ idd, typemeasure, serialnum, unit_name, max_consentration, max_day_consentration, def_colour, is_meteo, meteo_field })
+            .then(resp => {
+                this.setState({ openDialog: false });
 
-                    if (resp.status == 200) {
-                        this.load_soap().then(data => {
-                            if (data)
-                                this.setState({ soap_list: data });
+                if (resp.status == 200) {
+                    this.load_user().then(data => {
+                        if (data)
+                            this.setState({ dev_list: data });
 
-                            this.setState({ isLoading: true });
-                            this.setState({ snack_msg: 'Станция подключена...' });
-
-                        });
-                    } else {
                         this.setState({ isLoading: true });
-                        this.setState({ snack_msg: 'Ошибка сервера...' });
-                    };
-                });;
-        }
+                        this.setState({ snack_msg: 'Данные успешно добавлены...' });
+
+                    });
+                } else {
+                    this.setState({ isLoading: true });
+                    this.setState({ snack_msg: 'Ошибка сервера...' });
+                };
+            });;
+
 
     };
 
     componentWillMount() {
 
 
-        this.load_soap().then(data => {
+        this.load_user().then(data => {
             if (data)
-                this.setState({ soap_list: data });
+                this.setState({ dev_list: data });
         });
 
 
@@ -429,7 +455,7 @@ class SoapForm extends React.Component {
 
 
     render() {
-        const { soap_list } = this.state;
+        const { dev_list } = this.state;
         const { snack_msg, isLoading } = this.state;
 
         const { toggleSelection, toggleAll, isSelected } = this;
@@ -478,67 +504,68 @@ class SoapForm extends React.Component {
             </div>;
         const Title = [
             {
-                Header: "Перечень станций наблюдения и SOAP серверов",
+                Header: "Перечень опрашиваемого оборудования станций",
                 columns: [
-                    {
-                        Header: "Наименование станции",
-                        id: "namestation",
-                        accessor: "namestation",
-                        accessor: d => d.id,
-                        Cell: this.renderEditable
 
-                    },
+
                     {
-                        Header: "Ункальный код станции",
+                        Header: "ID станции наблюдения",
                         id: "idd",
                         accessor: "idd",
                         Cell: this.renderEditable
 
                     },
-
                     {
-                        Header: "Станция в работе",
-                        id: "is_present",
-                        accessor: "is_present",
-
-                    },
-
-                    {
-                        Header: "Адрес сервера",
-                        id: "address",
-                        accessor: "address",
-                        accessor: d => d.id,
+                        Header: "Тип измерений",
+                        id: "typemeasure",
+                        accessor: "typemeasure",
                         Cell: this.renderEditable
 
                     },
                     {
-                        Header: "Логин",
-                        id: "login",
-                        accessor: "login",
+                        Header: "Размерность",
+                        id: "unit_name",
+                        accessor: "unit_name",
                         Cell: this.renderEditable
 
                     },
                     {
-                        Header: "Пароль",
-                        id: "password_soap",
-                        accessor: "password_soap",
+                        Header: "ID датчика",
+                        id: "serialnum",
+                        accessor: "serialnum",
                         Cell: this.renderEditable
 
                     },
                     {
-                        Header: "Период опроса, сек.",
-                        id: "updateperiod",
-                        accessor: "updateperiod",
+                        Header: "Цвет отображения на графике",
+                        id: "def_colour",
+                        accessor: "def_colour",
+                        Cell: this.renderEditable
+
+                    },
+
+                    {
+                        Header: "ПДК м.",
+                        id: "max_consentration",
+                        accessor: "max_consentration",
                         Cell: this.renderEditable
 
                     },
                     {
-                        Header: "Права доступа",
-                        id: "useraccessright",
-                        accessor: "useraccessright",
+                        Header: "ПДК с.с.",
+                        id: "max_day_consentration",
+                        accessor: "max_day_consentration",
+                        Cell: this.renderEditable
+
+                    },
+                    ,
+                    {
+                        Header: "Время предыдущей загрузки данных",
+                        id: "date_time_out",
+                        accessor: "date_time_out"
                     },
                     {
-                        Header: "Дата добавления",
+                        Header: "Время создания",
                         id: "date_time_in",
                         accessor: "date_time_in"
                     }
@@ -553,28 +580,31 @@ class SoapForm extends React.Component {
 
             <Paper className={classes.root}>
                 <br />
-                <MenuStation
+                <MenuAdmin
                     {...this.props} snack_msg={snack_msg} isLoading={isLoading}
-                    handleActivate={this.handleActivate.bind(this)}
+
                     handleSnackClose={this.handleSnackClose.bind(this)}
                     handleUpdate={this.handleUpdate.bind(this)}
                     handleDelete={this.handleDelete.bind(this)}
                     handleDialogAdd={this.handleDialogAdd.bind(this)}
                     data_actual={this.state.soap_actual}
                 />
-                <StationsDialog openDialog={this.state.openDialog}
+                <DeviceDialog openDialog={this.state.openDialog}
                     handleDialogClose={this.handleDialogClose.bind(this)}
                     handleAdd={this.handleAdd.bind(this)}
                     handleChange={this.handleChange.bind(this)}
-                    updateperiod={this.state.updateperiod}
-                    idd={this.state.idd} />
-
+                    meteo_field={this.state.meteo_field}
+                    unit_name={this.state.unit_name}
+                    idd={this.state.idd}
+                    serialnum={this.state.serialnum}
+                    typemeasure={this.state.typemeasure}
+                />
 
                 <div >
                     <CheckboxTable
                         ref={r => (this.checkboxTable = r)}
                         {...checkboxProps}
-                        data={soap_list}
+                        data={dev_list}
                         columns={Title}
                         defaultPageSize={7}
                         previousText={'Предыдущие'}
@@ -624,19 +654,18 @@ function mapStateToProps(state) {
 }
 
 
-SoapForm.propTypes = {
-    getSoap: PropTypes.func.isRequired,
-    updateSoap: PropTypes.func.isRequired,
-    deleteSoap: PropTypes.func.isRequired,
-    insertSoap: PropTypes.func.isRequired,
-    activateSoap: PropTypes.func.isRequired,
+EquipmentForm.propTypes = {
+    getDev: PropTypes.func.isRequired,
+    updateDev: PropTypes.func.isRequired,
+    deleteDev: PropTypes.func.isRequired,
+    insertDev: PropTypes.func.isRequired,
     classes: PropTypes.object.isRequired
 }
 
-SoapForm.contextType = {
+EquipmentForm.contextType = {
     router: PropTypes.object.isRequired
 }
 
 export default connect(null, {
-    getSoap, updateSoap, deleteSoap, insertSoap, activateSoap
-})(withRouter(withStyles(styles)(SoapForm)));
+    getDev, updateDev, deleteDev, insertDev
+})(withRouter(withStyles(styles)(EquipmentForm)));

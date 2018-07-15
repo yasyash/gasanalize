@@ -34,7 +34,7 @@ export function getFtp() {
                         pwd: element.pwd,
                         periods: element.periods,
                         date_time: new Date(element.date_time).format('dd-MM-Y HH:mm:SS'),
-                        idd: element.id
+                        idd: String(element.id)
                     })
 
                 });
@@ -90,11 +90,14 @@ export function getSoap() {
                 data.forEach(element => {
                     list.push({
                         address: element.address,
-                        username: element.username,
-                        pwd: element.pwd,
-                        periods: element.periods,
-                        date_time: new Date(element.date_time).format('dd-MM-Y HH:mm:SS'),
-                        idd: element.id
+                        is_present: element.is_present ? 'включена' : 'деактивирована',
+                        login: element.login,
+                        password_soap: element.password_soap,
+                        updateperiod: element.updateperiod,
+                        namestation: element.namestation,
+                        useraccessright: element.useraccessright,
+                        date_time_in: new Date(element.date_time_in).format('dd-MM-Y HH:mm:SS'),
+                        idd: element.idd
                     })
 
                 });
@@ -114,7 +117,15 @@ export function updateSoap(paramstr) {
             .then(resp => resp)
     };
 };
+export function activateSoap(paramstr) {
 
+    // const data = JSON.stringify(paramstr);
+    //  console.log('parameters is ', data);
+    return dispatch => {
+        return Axios.post('/api/admin/soap_activate', { id: paramstr })
+            .then(resp => resp)
+    };
+};
 export function deleteSoap(paramstr) {
 
     // const data = JSON.stringify(paramstr);
@@ -130,7 +141,7 @@ export function insertSoap(paramstr) {
     // const data = JSON.stringify(paramstr);
     //  console.log('parameters is ', data);
     return dispatch => {
-        return Axios.post('/api/admin/soap_insert', paramstr)
+        return Axios.post('/api/admin/soap_insert',  paramstr )
             .then(resp => resp)
     };
 };
@@ -201,7 +212,132 @@ export function insertUser(paramstr) {
     // const data = JSON.stringify(paramstr);
     //  console.log('parameters is ', data);
     return dispatch => {
-        return Axios.post('/api/admin/soap_insert', paramstr)
+        return Axios.post('/api/admin/user_insert', paramstr)
+            .then(resp => resp)
+    };
+};
+
+// Meteostation's API
+
+
+export function getMeteo() {
+
+    // const data = JSON.stringify(paramstr);
+    //  console.log('parameters is ', data);
+    return dispatch => {
+        return Axios.get('/api/admin/meteo_get')
+            .then(resp => {
+                let list = [];
+                let data = resp.data.userlist;
+
+                data.forEach(element => {
+                    list.push({
+                        updateperiod: element.updateperiod,
+                        namestation: element.namestation,
+                        date_time_in: new Date(element.date_time_in).format('dd-MM-Y HH:mm:SS'),
+                        idd: element.idd
+                    })
+
+                });
+
+
+                return wrapData(list);
+            })
+    };
+};
+
+export function updateMeteo(paramstr) {
+
+    // const data = JSON.stringify(paramstr);
+    //  console.log('parameters is ', data);
+    return dispatch => {
+        return Axios.post('/api/admin/meteo_update', ...paramstr)
+            .then(resp => resp)
+    };
+};
+
+
+export function deleteMeteo(paramstr) {
+
+    // const data = JSON.stringify(paramstr);
+    //  console.log('parameters is ', data);
+    return dispatch => {
+        return Axios.post('/api/admin/meteo_del', { id: paramstr })
+            .then(resp => resp)
+    };
+};
+
+export function insertMeteo(paramstr) {
+
+    // const data = JSON.stringify(paramstr);
+    //  console.log('parameters is ', data);
+    return dispatch => {
+        return Axios.post('/api/admin/meteo_insert', paramstr)
+            .then(resp => resp)
+    };
+};
+
+//Equipment's API
+
+export function getDev() {
+
+    // const data = JSON.stringify(paramstr);
+    //  console.log('parameters is ', data);
+    return dispatch => {
+        return Axios.get('/api/admin/dev_get')
+            .then(resp => {
+                let list = [];
+                let data = resp.data.userlist;
+
+                data.forEach(element => {
+                    list.push({
+                        id: String(element.id),
+                        idd: element.idd,
+                        typemeasure: element.typemeasure,
+                        serialnum: element.serialnum,
+                        date_time_in: new Date(element.date_time_in).format('dd-MM-Y HH:mm:SS'),
+                        date_time_out: new Date(element.date_time_out).format('dd-MM-Y HH:mm:SS'),
+                        unit_name: element.unit_name,
+                        def_colour: element.def_colour,
+                        max_consentration: element.max_consentration,
+                        max_day_consentration: element.max_day_consentration
+                    })
+
+                });
+
+
+                return wrapData(list);
+            })
+    };
+};
+
+export function updateDev(paramstr) {
+
+    // const data = JSON.stringify(paramstr);
+    //  console.log('parameters is ', data);
+    return dispatch => {
+        return Axios.post('/api/admin/dev_update', ...paramstr)
+            .then(resp => resp)
+    };
+};
+
+
+export function deleteDev(paramstr) {
+
+    // const data = JSON.stringify(paramstr);
+    //  console.log('parameters is ', data);
+    return dispatch => {
+        return Axios.post('/api/admin/dev_del', { idd: paramstr })
+            .then(resp => resp)
+    };
+};
+
+export function insertDev(paramstr) {
+
+    // const data = JSON.stringify(paramstr);
+    //  console.log('parameters is ', data);
+    return dispatch => {
+        return Axios.post('/api/admin/dev_insert', paramstr)
             .then(resp => resp)
     };
 };

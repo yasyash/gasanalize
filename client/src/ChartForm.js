@@ -614,7 +614,7 @@ class ChartForm extends React.Component {
                 />
 
                 {(this.state.checkedLine) &&
-                    <Line
+                    <Line 
                         ref='line-chart'
                         data={this.state.chartData}
                         options={{
@@ -626,7 +626,7 @@ class ChartForm extends React.Component {
                         }}
                     />}
                 {(!this.state.checkedLine) &&
-                    <Bar
+                    <Bar 
                         data={this.state.chartData}
                         options={{
                             title: titles,
