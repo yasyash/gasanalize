@@ -475,7 +475,14 @@ class FtpForm extends React.Component {
             {
                 Header: "Перечень FTP серверов",
                 columns: [
+                    {
+                        Header: "Индекс файла",
+                        id: "indx",
+                        accessor: "indx",
+                        accessor: d => d.id,
+                        Cell: this.renderEditable
 
+                    },
 
                     {
                         Header: "Адрес сервера",
@@ -496,6 +503,20 @@ class FtpForm extends React.Component {
                         Header: "Пароль",
                         id: "pwd",
                         accessor: "pwd",
+                        Cell: this.renderEditable
+
+                    },
+                    {
+                        Header: "Папка на сервере",
+                        id: "folder",
+                        accessor: "folder",
+                        Cell: this.renderEditable
+
+                    },
+                    {
+                        Header: "Название в файле",
+                        id: "name",
+                        accessor: "name",
                         Cell: this.renderEditable
 
                     },

@@ -81,8 +81,8 @@ class DailyReport extends React.Component {
             snack_msg: '',
             errors: {},
             isLoading: false,
-            dateTimeBegin: new Date(today).format('Y-MM-ddT') + '00:00',
-            dateTimeEnd: new Date(today).format('Y-MM-ddT') + '23:59:59',
+            dateTimeBegin: new Date().format('Y-MM-ddT') + '00:00',
+            dateTimeEnd: new Date().format('Y-MM-ddT') + '23:59',
             station_actual,
             station_name: '',
             sensors_actual,
@@ -118,8 +118,8 @@ class DailyReport extends React.Component {
         };
 
 
-        dateAddAction({ 'dateTimeBegin': this.state.dateTimeBegin });
-        dateAddAction({ 'dateTimeEnd': this.state.dateTimeEnd });
+      //  dateAddAction({ 'dateTimeBegin': this.state.dateTimeBegin });
+       // dateAddAction({ 'dateTimeEnd': this.state.dateTimeEnd });
         // this.onClick = this.onSubmit.bind(this);
         // this.onClose= this.handleClose.bind(this);
         //this.onExited= this.handleClose.bind(this);
@@ -198,7 +198,9 @@ class DailyReport extends React.Component {
                 this.setState({ sensorsList: sensorsList });
                 this.setState({ macsList: macsList });
 
-                for (var ms = -6060000; ms < 80340000; ms += 1200000) {
+                //for (var ms = -6060000; ms < 80340000; ms += 1200000) {
+                for (var ms = -16860000; ms < 69540000; ms += 1200000) {
+
                     time_frame.push(new Date(ms).format('HH:mm'));
                 }
                 // addActiveSensorsList(this.state.selection);

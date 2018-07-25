@@ -659,18 +659,18 @@ saveAs(blob, 'OperativeReport_'+new Date(dateTimeEnd).format('dd-MM-Y_H:mm')+'.d
         const value = event.target.value;
         const id = event.target.id;
         if (this.props.report_type=='daily'){
-            dateAddAction({ 'dateTimeBegin': value + 'T00:00:00' });
-            dateAddAction({ 'dateTimeEnd': value + 'T23:59:59' });
+            dateAddAction({ 'dateTimeBegin': value + 'T00:00' });
+            dateAddAction({ 'dateTimeEnd': value + 'T23:59' });
             if (!isEmpty(this.props.station_name)){
             this.props.handleReportChange({station_name: this.props.station_name,station_actual: this.props.station_actual,
-                'dateTimeBegin': value + 'T00:00:00', 'dateTimeEnd': value + 'T23:59:59', chemical: this.state.chemical});
+                'dateTimeBegin': value + 'T00:00', 'dateTimeEnd': value + 'T23:59', chemical: this.state.chemical});
 
         }
        }
 
        if (this.props.report_type=='monthly'){
            var dateTimeBegin =new Date( new Date(value).getFullYear(), new Date(value).getMonth(), '1','0','0').format('Y-MM-ddTHH:mm');
-           var dateTimeEnd = new Date(new Date(value).getFullYear(), new Date(value).getMonth(), this.daysInMonth(new Date(value).getMonth()), '23','59','59').format('Y-MM-ddTHH:mm:SS');
+           var dateTimeEnd = new Date(new Date(value).getFullYear(), new Date(value).getMonth(), this.daysInMonth(new Date(value).getMonth()), '23','59').format('Y-MM-ddTHH:mm');
             dateAddAction({ 'dateTimeBegin': dateTimeBegin });
             dateAddAction({ 'dateTimeEnd': dateTimeEnd });
 

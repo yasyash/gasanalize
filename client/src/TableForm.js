@@ -493,14 +493,7 @@ class TableForm extends React.Component {
                     </Tab>
 
                 </Tabs>
-                <IconButton
-                    iconStyle={styles.smallIcon}
-                    style={styles.small} tooltip={'Обновить'}
-                    onClick={this.onSubmit}
-                >
-                    <Renew />
-
-                </IconButton>
+             
 
 
             </Paper >

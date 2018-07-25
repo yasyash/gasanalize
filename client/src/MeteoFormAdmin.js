@@ -166,7 +166,7 @@ class MeteoFormAdmin extends React.Component {
         // it does not exist so add it
         //ONLY ON ROW MAY BE SELECTED
         // selection = key;
-        this.setState({ soap_actual: row.idd });
+        this.setState({ soap_actual: row.id });
         //meteo---
         //}
         // update the state
@@ -297,10 +297,11 @@ class MeteoFormAdmin extends React.Component {
     };
 
     handleUpdate() {
-        if (!isEmpty(this.state.soap_actual)) {
+        //updt meteo
+        if (!isEmpty(String(this.state.soap_actual))) {
             const { soap_list } = this.state;
             let filter = soap_list.filter((item, i, arr) => {
-                return item.idd == this.state.soap_actual;
+                return item.id == this.state.soap_actual;
             });
             this.props.updateMeteo(filter).then(resp => {
                 if (resp.status == 200) {
@@ -466,6 +467,14 @@ class MeteoFormAdmin extends React.Component {
                         Header: "Ункальный код станции",
                         id: "idd",
                         accessor: "idd",
+                        Cell: this.renderEditable
+
+                    },
+                    ,
+                    {
+                        Header: "Папка на сервере",
+                        id: "folder",
+                        accessor: "folder",
                         Cell: this.renderEditable
 
                     },

@@ -86,7 +86,7 @@ class MonthlyReport extends React.Component {
             errors: {},
             isLoading: false,
             dateTimeBegin: new Date(new Date().getFullYear(), new Date().getMonth(), 1, '0', '0').format('Y-MM-ddTHH:mm'),
-            dateTimeEnd: new Date().format('Y-MM-ddT') + '23:59:59',
+            dateTimeEnd: new Date().format('Y-MM-ddT') + '23:59',
             station_actual,
             station_name: '',
             sensors_actual,
@@ -122,8 +122,8 @@ class MonthlyReport extends React.Component {
         };
 
         //first init
-        dateAddAction({ 'dateTimeBegin': this.state.dateTimeBegin });
-        dateAddAction({ 'dateTimeEnd': this.state.dateTimeEnd });
+       // dateAddAction({ 'dateTimeBegin': this.state.dateTimeBegin });
+        //dateAddAction({ 'dateTimeEnd': this.state.dateTimeEnd });
         // this.onClick = this.onSubmit.bind(this);
         // this.onClose= this.handleClose.bind(this);
         //this.onExited= this.handleClose.bind(this);
@@ -191,19 +191,23 @@ class MonthlyReport extends React.Component {
             params.period_to = state.dateTimeEnd;
         };
         params.station = state.station_actual;
-        params.station_name =  state.station_name;
+        params.station_name = state.station_name;
         params.get = true;
 
         reportGet_monthly(params).then(resp => {
             if (resp) {
 
-                let avrg_measure =resp.avrg_measure;
-                let data_raw =resp.data_raw;
+                let avrg_measure = resp.avrg_measure;
+                let data_raw = resp.data_raw;
                 let data = resp.data;
-
+                let proxy = [];
+                data_raw.forEach(element => {
+                    if (!isEmpty(element))
+                        proxy.push(element);
+                });
                 this.setState({ 'data_4_report': data });
                 // this.setState({ 'station_name': state.station_name });
-                this.setState({ 'data_raw': data_raw });
+                this.setState({ 'data_raw': proxy });
                 this.setState({ 'avrg_measure': avrg_measure });
 
                 this.setState({ isLoading: true });

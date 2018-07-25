@@ -52,9 +52,12 @@ router.post('/ftp_update', authenticate, (req, resp) => {
 
     FTP.where({ id: data.idd })
         .save({
+            indx: data.indx,
             address: data.address,
             username: data.username,
             pwd: data.pwd,
+            folder: data.folder,
+            name: data.name,
             periods: data.periods,
             date_time: new Date().format('Y-MM-dd HH:mm:SS')
         }, { patch: true })
@@ -437,6 +440,7 @@ router.post('/meteo_update', authenticate, (req, resp) => {
         .save({
             updateperiod: data.updateperiod,
             namestation: data.namestation,
+            folder: data.folder,
             // date_time_out: new Date().format('dd-MM-Y HH:mm:SS'),
             idd: data.idd
             //  is_active: data.is_active,
@@ -618,7 +622,7 @@ router.post('/dev_insert', authenticate, (req, resp) => {
             let measure_class = 'data';
             if (data.is_meteo == 'true') measure_class = data.meteo_field;
 
-           // let meteo_field = data.meteo_field;
+            // let meteo_field = data.meteo_field;
             let is_wind_sensor = false;
             let date_time_in = new Date().format('Y-MM-dd HH:mm:SS');
             let date_time_out = date_time_in;

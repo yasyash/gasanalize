@@ -86,7 +86,7 @@ class Tza4Report extends React.Component {
             errors: {},
             isLoading: false,
             dateTimeBegin: new Date(new Date().getFullYear(), new Date().getMonth(), 1, '0', '0').format('Y-MM-ddTHH:mm'),
-            dateTimeEnd: new Date().format('Y-MM-ddT') + '23:59:59',
+            dateTimeEnd: new Date().format('Y-MM-ddT') + '23:59',
             station_actual,
             station_name: '',
             sensors_actual,
@@ -107,8 +107,8 @@ class Tza4Report extends React.Component {
         };
 
         //first init
-        dateAddAction({ 'dateTimeBegin': this.state.dateTimeBegin });
-        dateAddAction({ 'dateTimeEnd': this.state.dateTimeEnd });
+       // dateAddAction({ 'dateTimeBegin': this.state.dateTimeBegin });
+        //dateAddAction({ 'dateTimeEnd': this.state.dateTimeEnd });
         // this.onClick = this.onSubmit.bind(this);
         // this.onClose= this.handleClose.bind(this);
         //this.onExited= this.handleClose.bind(this);

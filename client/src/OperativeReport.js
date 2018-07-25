@@ -76,7 +76,7 @@ class OperativeReport extends React.Component {
 
         let today = new Date();
         today -= 1200000;//20 min in milliseconds
-        today -= 14400000;
+        //today -= 14400000;
 
         this.state = {
             title: '',
@@ -85,7 +85,7 @@ class OperativeReport extends React.Component {
             isLoading: false,
 
             dateTimeBegin: new Date(today).format('Y-MM-ddTHH:mm'),
-            dateTimeEnd: new Date(today + 1200000).format('Y-MM-ddTHH:mm'),
+            dateTimeEnd: new Date().format('Y-MM-ddTHH:mm'),
             station_actual,
             station_name: '',
             sensors_actual,
@@ -127,8 +127,8 @@ class OperativeReport extends React.Component {
 
         //   this.onRowSelection = this.onRowSelection.bind(this);
 
-        dateAddAction({ 'dateTimeBegin': this.state.dateTimeBegin });
-        dateAddAction({ 'dateTimeEnd': this.state.dateTimeEnd });
+        //dateAddAction({ 'dateTimeBegin': this.state.dateTimeBegin });
+        //dateAddAction({ 'dateTimeEnd': this.state.dateTimeEnd });
 
     }
 
